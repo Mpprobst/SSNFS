@@ -30,13 +30,13 @@ If file table exists, its state is restored (TODO)
 */
 void init_disk() {
  FILE * vm = fopen("virtual_mem.dat", "r");
- if (vm < 0) {
+ if (!vm) {
 	 vm = fopen("virtual_mem.dat", "w");
 	 printf("virtual memory not initialized");
  }
 
  FILE * ft = fopen("file_table.dat", "r");
- if (ft < 0) {
+ if (!ft) {
 	 ft = fopen("file_table.dat", "w");
 	 printf("file table not initialized");
  }
@@ -64,6 +64,8 @@ File can only be 64 blocks long and is allocated on creation
 */
 open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 {
+	init_disk();
+
 	static open_output  result;
 
 	result.fd=20;
