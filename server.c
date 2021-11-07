@@ -3,11 +3,66 @@
  * These are only templates and you can use them
  * as a guideline for developing your own functions.
  */
-
+ // Based on file provided on canvas
 #include "ssnfs.h"
 
-open_output *
-open_file_1_svc(open_input *argp, struct svc_req *rqstp)
+#define BLOCK_SIZE 512
+#define FILE_SIZE 64	// blocks
+#define DISK_SIZE 16 // MB
+#define FILE_TABLE_SIZE 20	// number of files that may be open at a time
+
+/*
+Must use a linux file (.dat) as a virtual disk to store client files.
+Virtual disk is a sequence of blocks containing 512B with max size of 16MB (32,000 blocks)
+Users are given a home directory, but cannot create subdirectories (handle this case)
+File table maintains information about files such as: user, fd, file pointer.
+This persists such that memory can be restored if client crashes.
+	i.e. if client crashes, the files remain open
+	if server crashes, file table is preserved and can be loaded
+*/
+
+// Need a dictionary that stores the user's name and the files they own.
+// Files in the table are represented by their block id in virtual memory.
+
+/*
+Creates the virtual disk and file table if they do not exist.
+If file table exists, its state is restored (TODO)
+*/
+void init_disk() {
+ vm = fopen("virtual_mem.dat", "r");
+ if (vm < 0) {
+	 vm = fopen("virtual_mem.dat", "w");
+	 printf("virtual memory not initialized");
+ }
+
+ ft = fopen("file_table.dat", "r");
+ if (ft < 0) {
+	 ft = fopen("file_table.dat", "w");
+	 print("file table not initialized");
+ }
+}
+
+/*
+searches virtual disk for a file belonging to a specific user.
+returns: the file descriptor, or -1 if doesn't exist
+*/
+int file_exists(char * username, char * filename) {
+
+}
+
+/*
+creates a file and adds it to the dictionary of files.
+returns: file descriptor of new file
+*/
+int create_file(char * username, char * filename) {
+
+}
+
+/*
+Opens or creates a file of name provided by client.
+File can only be 64 blocks long and is allocated on creation
+*/
+open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 {
 	static open_output  result;
 
@@ -19,12 +74,15 @@ open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
 	//	fflush((FILE *) 1);
+
+	// check if file exists
+	// check if file is already open
+	// add file to file table
+
 	return &result;
 }
 
-
-read_output *
-read_file_1_svc(read_input *argp, struct svc_req *rqstp)
+read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp)
 {
 	static read_output  result;
 
@@ -33,8 +91,7 @@ read_file_1_svc(read_input *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-write_output *
-write_file_1_svc(write_input *argp, struct svc_req *rqstp)
+write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
 	static write_output  result;
 
@@ -43,8 +100,7 @@ write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-list_output *
-list_files_1_svc(list_input *argp, struct svc_req *rqstp)
+list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
 	static list_output  result;
 
@@ -53,8 +109,7 @@ list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-delete_output *
-delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
+delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 {
 	static delete_output  result;
 
@@ -63,8 +118,7 @@ delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 	return &result;
 }
 
-close_output *
-close_file_1_svc(close_input *argp, struct svc_req *rqstp)
+close_output * close_file_1_svc(close_input *argp, struct svc_req *rqstp)
 {
 	static close_output  result;
 

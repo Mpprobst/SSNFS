@@ -3,6 +3,7 @@
  * These are only templates and you can use them
  * as a guideline for developing your own functions.
  */
+ // Based on file provided on canvas
 
 #include <stdio.h>
 #include <rpc/rpc.h>
@@ -13,8 +14,7 @@
 
 CLIENT *clnt;
 
-void
-ssnfsprog_1(char *host)
+void ssnfsprog_1(char *host)
 {
 clnt = clnt_create (host, SSNFSPROG, SSNFSVER, "tcp");
 	if (clnt == NULL) {
@@ -22,6 +22,13 @@ clnt = clnt_create (host, SSNFSPROG, SSNFSVER, "tcp");
 		exit (1);
 	}
 }
+
+/*
+Open: opens a file with the given name in the user's directory. If file does
+not exist, it is created. If file cannot be opened or created, return -1 as an
+indicator of error. 
+returns: file descriptor of opened file.
+*/
 int Open(char *filename_to_open){
   open_output  *result_1;
   open_input  open_file_1_arg;
@@ -34,7 +41,6 @@ int Open(char *filename_to_open){
 	printf ("In client: Directory name is:%s \nIn client: Name of the file opened is:%s \nIn client: file descriptor returned is:%d\n", open_file_1_arg.user_name, result_1->out_msg.out_msg_val,  result_1->fd);
 	return  result_1->fd;
 }
-
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
 write_output  *result_3;
@@ -54,6 +60,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 	}
 
 }
+
 void Close(int fd){
 	close_output  *result_6;
 	close_input  close_file_1_arg;
@@ -62,6 +69,7 @@ void Close(int fd){
 		clnt_perror (clnt, "call failed");
 	}
 }
+
 void List(){
 	list_output  *result_4;
 	list_input  list_files_1_arg;
@@ -70,6 +78,7 @@ void List(){
 		clnt_perror (clnt, "call failed");
 	}
 }
+
 void Delete(char * file_name){
 	delete_output  *result_5;
 	delete_input  delete_file_1_arg;
@@ -79,10 +88,7 @@ void Delete(char * file_name){
 	}
 }
 
-
-
-int
-main (int argc, char *argv[])
+int main (int argc, char *argv[])
 {
 	char *host;
 
