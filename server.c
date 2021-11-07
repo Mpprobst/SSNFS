@@ -29,16 +29,16 @@ Creates the virtual disk and file table if they do not exist.
 If file table exists, its state is restored (TODO)
 */
 void init_disk() {
- vm = fopen("virtual_mem.dat", "r");
+ int vm = fopen("virtual_mem.dat", "r");
  if (vm < 0) {
 	 vm = fopen("virtual_mem.dat", "w");
 	 printf("virtual memory not initialized");
  }
 
- ft = fopen("file_table.dat", "r");
+ int ft = fopen("file_table.dat", "r");
  if (ft < 0) {
 	 ft = fopen("file_table.dat", "w");
-	 print("file table not initialized");
+	 printf("file table not initialized");
  }
 }
 
