@@ -64,6 +64,8 @@ File can only be 64 blocks long and is allocated on creation
 */
 open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 {
+	init_disk();
+	
 	static open_output  result;
 
 	result.fd=20;
