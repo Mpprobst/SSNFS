@@ -4,62 +4,81 @@
  * as a guideline for developing your own functions.
  */
 
+#include <stdio.h>
+#include <rpc/rpc.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 #include "ssnfs.h"
 
+CLIENT *clnt;
 
 void
 ssnfsprog_1(char *host)
 {
-	CLIENT *clnt;
-	open_output  *result_1;
-	open_input  open_file_1_arg;
-	read_output  *result_2;
-	read_input  read_file_1_arg;
-	write_output  *result_3;
-	write_input  write_file_1_arg;
-	list_output  *result_4;
-	list_input  list_files_1_arg;
-	delete_output  *result_5;
-	delete_input  delete_file_1_arg;
-	close_output  *result_6;
-	close_input  close_file_1_arg;
-
-#ifndef	DEBUG
-	clnt = clnt_create (host, SSNFSPROG, SSNFSVER, "udp");
+clnt = clnt_create (host, SSNFSPROG, SSNFSVER, "tcp");
 	if (clnt == NULL) {
 		clnt_pcreateerror (host);
 		exit (1);
 	}
-#endif	/* DEBUG */
-
-	result_1 = open_file_1(&open_file_1_arg, clnt);
+}
+int Open(char *filename_to_open){
+  open_output  *result_1;
+  open_input  open_file_1_arg;
+  strcpy(open_file_1_arg.user_name, getpwuid(getuid())->pw_name);
+  strcpy(open_file_1_arg.file_name,filename_to_open);
+  result_1 = open_file_1(&open_file_1_arg, clnt);
 	if (result_1 == (open_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+	printf ("In client: Directory name is:%s \nIn client: Name of the file opened is:%s \nIn client: file descriptor returned is:%d\n", open_file_1_arg.user_name, result_1->out_msg.out_msg_val,  result_1->fd);
+	return  result_1->fd;
+}
+
+
+void Write(int fd, char * buffer, int num_bytes_to_write){
+write_output  *result_3;
+write_input  write_file_1_arg;
+result_3 = write_file_1(&write_file_1_arg, clnt);
+	if (result_3 == (write_output *) NULL) {
+		clnt_perror (clnt, "call failed");
+	}
+}
+
+void Read(int fd, char * buffer, int num_bytes_to_read){
+        read_output  *result_2;
+	read_input  read_file_1_arg;
 	result_2 = read_file_1(&read_file_1_arg, clnt);
 	if (result_2 == (read_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	result_3 = write_file_1(&write_file_1_arg, clnt);
-	if (result_3 == (write_output *) NULL) {
+
+}
+void Close(int fd){
+	close_output  *result_6;
+	close_input  close_file_1_arg;
+        result_6 = close_file_1(&close_file_1_arg, clnt);
+	if (result_6 == (close_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+}
+void List(){
+	list_output  *result_4;
+	list_input  list_files_1_arg;
 	result_4 = list_files_1(&list_files_1_arg, clnt);
 	if (result_4 == (list_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+}
+void Delete(char * file_name){
+	delete_output  *result_5;
+	delete_input  delete_file_1_arg;
 	result_5 = delete_file_1(&delete_file_1_arg, clnt);
 	if (result_5 == (delete_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	result_6 = close_file_1(&close_file_1_arg, clnt);
-	if (result_6 == (close_output *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-#ifndef	DEBUG
-	clnt_destroy (clnt);
-#endif	 /* DEBUG */
 }
+
 
 
 int
@@ -73,5 +92,7 @@ main (int argc, char *argv[])
 	}
 	host = argv[1];
 	ssnfsprog_1 (host);
+	int fd=Open("myfile");
+	printf("File descriptor returnd inside main() is:%d\n",  fd);
 exit (0);
 }
