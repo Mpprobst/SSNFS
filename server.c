@@ -9,7 +9,7 @@
 #define BLOCK_SIZE 512
 #define FILE_SIZE 64	// blocks
 #define DISK_SIZE 16 // MB
-#define FILE_TABLE_SIZE 20	// number of files that may be open at a time
+#define TABLE_SIZE 20	// number of files that may be open at a time
 
 /*
 Must use a linux file (.dat) as a virtual disk to store client files.
@@ -21,33 +21,128 @@ This persists such that memory can be restored if client crashes.
 	if server crashes, file table is preserved and can be loaded
 */
 
-// Need a dictionary that stores the user's name and the files they own.
-// Files in the table are represented by their block id in virtual memory.
+char * vm_filename = "virtual_mem.dat";
+char * ft_filename = "file_table.dat";
+char * dict_filename = "file_dict.dat";
+
+struct table_entry {
+	int block_id;	// id of block at which file starts
+	char * user; 	// user controlling file
+	char * file;
+	int fd;				// file descriptor
+	int fp;				// current position of file pointer
+	int op;				// operation id. what user is doing to file: 0-open, 1-read, 2-write
+};
+
+// structure of a file stored in the virtual memory.
+// note that there is no restriction on username and filename length. This will
+// cut into the space available for data, but it is the user's responsibility to
+// give names that do not take up too much space.
+struct file_info {
+  char user[10];
+	char name[10];
+	char * data;
+};
+
+// TODO: try storing a dictionary of which users own which files
 
 /*
 Creates the virtual disk and file table if they do not exist.
 If file table exists, its state is restored (TODO)
 */
 void init_disk() {
- FILE * vm = fopen("virtual_mem.dat", "r");
+ FILE * vm = fopen(vm_filename, "r");
  if (!vm) {
-	 vm = fopen("virtual_mem.dat", "w");
-	 printf("virtual memory not initialized");
+	 vm = fopen(vm_filename, "w");
+	 printf("virtual memory created.\n");
  }
 
- FILE * ft = fopen("file_table.dat", "r");
+ FILE * ft = fopen(ft_filename, "r");
  if (!ft) {
-	 ft = fopen("file_table.dat", "w");
-	 printf("file table not initialized");
+	 ft = fopen(ft_filename, "w");
+	 printf("file table created.\n");
  }
+
+ FILE * dict = fopen(dict_filename, "r");
+ if (!dict) {
+	 dict = fopen(dict_filename, "w");
+	 printf("file dictionary created.\n")
+ }
+
+ fclose(vm);
+ fclose(ft);
+ fclose(fd);
 }
 
 /*
-searches virtual disk for a file belonging to a specific user.
-returns: the file descriptor, or -1 if doesn't exist
+opens the file table file and returns an array describing it
+intended to be called only once per rpc operation and modified.
+at the end of the rpc operation, call update_table
+*/
+struct table_entry * get_file_table() {
+	struct table_entry table[TABLE_SIZE];
+	// read the table file and populate this array
+
+	return table;
+}
+
+/*
+given a table, write to the file table file.
+called at the end of rpc operations that modify the table
+*/
+void update_table(struct table_entry * table) {
+
+}
+
+/*
+check the file table if the file is already open. pass in a table so file is
+only read once per rpc call
+if so, return idx, else return -1
+*/
+int is_file_open(char * username, char * filename, struct table_entry * table) {
+	// probe the dictionary for the file, get block id
+	// check if the file is open in the file table
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		if (strcmp(table[i].file, filename)==0 && strcmp(table[i].user, username)==0) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+/*
+searches virtual disk and file table for a file belonging to a specific user.
+returns: block idx in which file exists.
 */
 int file_exists(char * username, char * filename) {
 
+}
+
+// UNTESTED
+struct file_info get_file_from_memory(char * username, char * filename, int block_idx=-1) {
+	struct file_info f;
+	FILE * mem = fopen(vm_filename, "r");
+	long memlen = ftell(mem);
+
+	if (block_idx == -1){
+		// scan block by block until we find the file
+		for (int i = 0; i < memlen; i+=BLOCK_SIZE) {
+			memcpy(f.user, mem+i, sizeof(f.user));
+			memcpy(f.name, mem+i+sizeof(f.user), sizeof(f.name));
+			if (strcmp(f.user, username)==0 && strcmp(f.name, filename)==0) {
+				block_idx = i;
+				break;
+			}
+		}
+	}
+
+	// index the block directly and populate it into a file_info.
+	memcpy(f.user, mem+block_idx, sizeof(f.user));
+	memcpy(f.name, mem+block_idx+sizeof(f.user), sizeof(f.name));
+	memcpy(f.data, mem+block_idx+sizeof(f.user)+sizeof(f.name));
+
+	return f;
 }
 
 /*
