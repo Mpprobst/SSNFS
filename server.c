@@ -94,7 +94,7 @@ struct table_entry is_file_open(char * username, char * filename) {
 		int loc = entry.block_id * BLOCK_SIZE * FILE_SIZE;
 		lseek(mem, loc, SEEK_SET);
 		read(mem, &info, 20);	// only read username and filename at first
-		print("byte: %d user: %s file: %s\n", loc, info.user, info.name);
+		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
 		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
 			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
 			break;
