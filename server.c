@@ -5,6 +5,10 @@
  */
  // Based on file provided on canvas
 #include "ssnfs.h"
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
 
 #define BLOCK_SIZE 512
 #define FILE_SIZE 64	// blocks
@@ -21,9 +25,9 @@ This persists such that memory can be restored if client crashes.
 	if server crashes, file table is preserved and can be loaded
 */
 
-char * vm_filename = "virtual_mem.dat";
-char * ft_filename = "file_table.dat";
-char * dict_filename = "file_dict.dat";
+const char * vm_filename = "virtual_mem.dat";
+const char * ft_filename = "file_table.dat";
+//char * dict_filename = "file_dict.dat";
 
 struct table_entry {
 	int block_id;	// id of block at which file starts
@@ -48,27 +52,20 @@ Creates the virtual disk and file table if they do not exist.
 If file table exists, its state is restored (TODO)
 */
 void init_disk() {
- FILE * vm = fopen(vm_filename, "r");
- if (!vm) {
-	 vm = fopen(vm_filename, "w");
+ int vm = open(vm_filename, O_RDONLY);
+ if (vm < 0) {
+	 vm = open(vm_filename, O_RDWR);
 	 printf("virtual memory created.\n");
  }
 
- FILE * ft = fopen(ft_filename, "r");
- if (!ft) {
-	 ft = fopen(ft_filename, "w");
+ int ft = open(ft_filename, O_RDONLY);
+ if (ft < 0) {
+	 ft = open(ft_filename, O_RDWR);
 	 printf("file table created.\n");
  }
 
- FILE * dict = fopen(dict_filename, "r");
- if (!dict) {
-	 dict = fopen(dict_filename, "w");
-	 printf("file dictionary created.\n")
- }
-
- fclose(vm);
- fclose(ft);
- fclose(fd);
+ close(vm);
+ close(ft);
 }
 
 
@@ -84,21 +81,20 @@ void update_table(struct table_entry * table) {
 check the file table if the file is already open.
 if so, return the table entry, null otherwise
 */
-int is_file_open(char * username, char * filename) {
-	int open = 0;
+struct table_entry is_file_open(char * username, char * filename) {
 	int table = open(ft_filename, O_RDONLY);
 	int mem = open(vm_filename, O_RDONLY);
-	struct table_entry entry = NULL;
+	struct table_entry entry;
 	struct file_info info;
+
 	// check if the file is open in the file table
 	for (; read(table, &entry, sizeof(entry)) > 0;) {
 		// seek to location of entry.
 		int loc = entry.block_id * BLOCK_SIZE * FILE_SIZE;
 		lseek(mem, loc, SEEK_SET);
 		read(mem, &info, 20);	// only read username and filename at first
-		if (info.name, filename)==0 && strcmp(info.user, username)==0) {
+		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
 			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
-			open = 1;
 			break;
 		}
 	}
@@ -120,22 +116,23 @@ int file_exists(char * username, char * filename) {
 creates a file and adds it to the dictionary of files.
 returns: file descriptor of new file
 */
-struct file_info create_file(char * username, char * filename, struct *file_info f) {
+int create_file(char * username, char * filename, struct file_info * f) {
 	//struct file_info f;
-	memcpy(f.user, username);
-	memcpy(f.name, filename);
-	f.data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
+	memcpy(f->user, username, 10);
+	memcpy(f->name, filename, 10);
+	f->data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
 	// TODO: Insert file in next free space. Do this after implementing delete
 	int mem = open(vm_filename, O_RDWR);
 	lseek(mem, -1, SEEK_END);
 	// TODO: check if memory is full
-	printf("\nsize of vm: %s\n", mem);
+	int block_id = mem;
+	printf("\nsize of vm: %d\n", mem);
 	write(mem, &f, sizeof(f));
 
-	printf("user: %s created file: %s\n", f.user, f.name);
-	printf("size of vm: %s\n", mem);
+	printf("user: %s created file: %s\n", f->user, f->name);
+	printf("size of vm: %d\n", mem);
 	close(mem);
-	return f;
+	return block_id;
 }
 
 /*
@@ -171,7 +168,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 	// TODO: check if file table is full
 	// TODO: fill in next available entry
 	lseek(table, 0, SEEK_END);
-	write(table, &entry, sizeof(entry))
+	write(table, &entry, sizeof(entry));
 	close(table);
 	// check if file exists
 	// check if file is already open
