@@ -91,7 +91,7 @@ struct table_entry is_file_open(char * username, char * filename) {
 	// check if the file is open in the file table
 	for (; read(table, &entry, sizeof(entry)) > 0;) {
 		// seek to location of entry.
-		int loc = entry.block_id * BLOCK_SIZE * FILE_SIZE;
+		int loc = entry.block_id;// * BLOCK_SIZE * FILE_SIZE;
 		lseek(mem, loc, SEEK_SET);
 		read(mem, &info, 20);	// only read username and filename at first
 		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
@@ -125,14 +125,14 @@ int create_file(char * username, char * filename, struct file_info * f) {
 	f->data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
 	// TODO: Insert file in next free space. Do this after implementing delete
 	int mem = open(vm_filename, O_RDWR);
-	int size = lseek(mem, -1, SEEK_END);
+	int size = lseek(mem, 0, SEEK_END);
 	// TODO: check if memory is full
 	int block_id = size;
 	printf("\nfile size = %d size of vm: %d\n", sizeof(*f), size);
-  size = write(mem, f, sizeof(*f));
+  write(mem, f, sizeof(*f));
 
 	printf("user: %s created file: %s\n", f->user, f->name);
-	printf("size of vm: %d\n", size);
+	printf("size of vm: %d\n", lseek(mem, 0, SEEK_END));
 	close(mem);
 	return block_id;
 }
@@ -172,8 +172,8 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 
 	int tbl_size = lseek(table, 0, SEEK_END);
 	printf("\ntable size: %d\n", tbl_size);
-	tbl_size = write(table, &entry, sizeof(entry));
-	printf("added table entry for %s/%s at block. table is now size: %d\n", file.user, file.name, entry.block_id, tbl_size);
+	write(table, &entry, sizeof(entry));
+	printf("added table entry for %s/%s at block %d. table is now size: %d\n", file.user, file.name, entry.block_id, lseek(table, 0, SEEK_END));
 	close(table);
 	// check if file exists
 	// check if file is already open
