@@ -48,21 +48,21 @@ Creates the virtual disk and file table if they do not exist.
 If file table exists, its state is restored (TODO)
 */
 void init_disk() {
- FILE * vm = fopen(vm_filename, "r");
- if (!vm) {
-	 vm = fopen(vm_filename, "w");
+ int vm = open(vm_filename, O_RDONLY);
+ if (vm < 0) {
+	 vm = open(vm_filename, O_RDWR);
 	 printf("virtual memory created.\n");
  }
 
- FILE * ft = fopen(ft_filename, "r");
- if (!ft) {
-	 ft = fopen(ft_filename, "w");
+ int ft = open(ft_filename, O_RDONLY);
+ if (ft < 0) {
+	 ft = open(ft_filename, O_RDWR);
 	 printf("file table created.\n");
  }
 
- FILE * dict = fopen(dict_filename, "r");
- if (!dict) {
-	 dict = fopen(dict_filename, "w");
+ int dict = fopen(dict_filename, O_RDONLY);
+ if (dict < 0) {
+	 dict = fopen(dict_filename, O_RDWR);
 	 printf("file dictionary created.\n")
  }
 
