@@ -27,8 +27,8 @@ char * dict_filename = "file_dict.dat";
 
 struct table_entry {
 	int block_id;	// id of block at which file starts
-	char * user; 	// user controlling file
-	char * file;
+	char user[10];// user controlling file
+	char file[10];
 	int fd;				// file descriptor
 	int fp;				// current position of file pointer
 	int op;				// operation id. what user is doing to file: 0-open, 1-read, 2-write
@@ -82,7 +82,11 @@ at the end of the rpc operation, call update_table
 struct table_entry * get_file_table() {
 	struct table_entry table[TABLE_SIZE];
 	// read the table file and populate this array
-
+	int fd = open(ft_filename, "r");
+	struct table_entry entry;
+	for (int i = 0; read(fd, &entry, sizeof(entry)) > 0; i++) {
+		memcpy(table[i], entry, sizeof(entry));
+	}
 	return table;
 }
 
@@ -100,7 +104,6 @@ only read once per rpc call
 if so, return idx, else return -1
 */
 int is_file_open(char * username, char * filename, struct table_entry * table) {
-	// probe the dictionary for the file, get block id
 	// check if the file is open in the file table
 	for (int i = 0; i < TABLE_SIZE; i++) {
 		if (strcmp(table[i].file, filename)==0 && strcmp(table[i].user, username)==0) {
@@ -138,9 +141,10 @@ struct file_info get_file_from_memory(char * username, char * filename, int bloc
 	}
 
 	// index the block directly and populate it into a file_info.
-	memcpy(f.user, mem+block_idx, sizeof(f.user));
-	memcpy(f.name, mem+block_idx+sizeof(f.user), sizeof(f.name));
-	memcpy(f.data, mem+block_idx+sizeof(f.user)+sizeof(f.name));
+	memcpy(f, mem+block_idx, sizeof(f));
+	//memcpy(f.user, mem+block_idx, sizeof(f.user));
+	//memcpy(f.name, mem+block_idx+sizeof(f.user), sizeof(f.name));
+	//memcpy(f.data, mem+block_idx+sizeof(f.user)+sizeof(f.name));
 
 	return f;
 }
@@ -150,7 +154,17 @@ creates a file and adds it to the dictionary of files.
 returns: file descriptor of new file
 */
 int create_file(char * username, char * filename) {
+	struct file_info f;
+	FILE * mem = fopen(vm_filename, "a");
+	long memlen = ftell(mem);
 
+	memcpy(f.user, username);
+	memcpy(f.name, filename);
+	f.data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
+	// append to memory
+	fprintf(mem, "%s", f.user);
+	fprintf(mem, "%s", f.name);
+	fprintf(mem, "%s", f.data);
 }
 
 /*
@@ -172,6 +186,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 	printf("In server username received:%s\n",argp->user_name);
 	//	fflush((FILE *) 1);
 
+	create_file(argp->user_name, argp->file_name);
 	// check if file exists
 	// check if file is already open
 	// add file to file table
