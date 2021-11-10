@@ -27,10 +27,7 @@ char * dict_filename = "file_dict.dat";
 
 struct table_entry {
 	int block_id;	// id of block at which file starts
-	char user[10];// user controlling file
-	char file[10];
 	int fd;				// file descriptor
-	int fp;				// current position of file pointer
 	int op;				// operation id. what user is doing to file: 0-open, 1-read, 2-write
 };
 
@@ -74,21 +71,6 @@ void init_disk() {
  fclose(fd);
 }
 
-/*
-opens the file table file and returns an array describing it
-intended to be called only once per rpc operation and modified.
-at the end of the rpc operation, call update_table
-*/
-struct table_entry * get_file_table() {
-	struct table_entry table[TABLE_SIZE];
-	// read the table file and populate this array
-	int fd = open(ft_filename, "r");
-	struct table_entry entry;
-	for (int i = 0; read(fd, &entry, sizeof(entry)) > 0; i++) {
-		memcpy(table[i], entry, sizeof(entry));
-	}
-	return table;
-}
 
 /*
 given a table, write to the file table file.
@@ -99,19 +81,31 @@ void update_table(struct table_entry * table) {
 }
 
 /*
-check the file table if the file is already open. pass in a table so file is
-only read once per rpc call
-if so, return idx, else return -1
+check the file table if the file is already open.
+if so, return the table entry, null otherwise
 */
-int is_file_open(char * username, char * filename, struct table_entry * table) {
+int is_file_open(char * username, char * filename) {
+	int open = 0;
+	int table = open(ft_filename, O_RDONLY);
+	int mem = open(vm_filename, O_RDONLY);
+	struct table_entry entry = NULL;
+	struct file_info info;
 	// check if the file is open in the file table
-	for (int i = 0; i < TABLE_SIZE; i++) {
-		if (strcmp(table[i].file, filename)==0 && strcmp(table[i].user, username)==0) {
-			return i;
+	for (; read(table, &entry, sizeof(entry)) > 0;) {
+		// seek to location of entry.
+		int loc = entry.block_id * BLOCK_SIZE * FILE_SIZE;
+		lseek(mem, loc, SEEK_SET);
+		read(mem, &info, 20);	// only read username and filename at first
+		if (info.name, filename)==0 && strcmp(info.user, username)==0) {
+			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
+			open = 1;
+			break;
 		}
 	}
 
-	return -1;
+	close(table);
+	close(mem);
+	return entry;
 }
 
 /*
@@ -145,7 +139,7 @@ struct file_info get_file_from_memory(char * username, char * filename, int bloc
 	//memcpy(f.user, mem+block_idx, sizeof(f.user));
 	//memcpy(f.name, mem+block_idx+sizeof(f.user), sizeof(f.name));
 	//memcpy(f.data, mem+block_idx+sizeof(f.user)+sizeof(f.name));
-
+	close(mem);
 	return f;
 }
 
@@ -153,18 +147,22 @@ struct file_info get_file_from_memory(char * username, char * filename, int bloc
 creates a file and adds it to the dictionary of files.
 returns: file descriptor of new file
 */
-int create_file(char * username, char * filename) {
-	struct file_info f;
-	FILE * mem = fopen(vm_filename, "a");
-	long memlen = ftell(mem);
-
+struct file_info create_file(char * username, char * filename, struct *file_info f) {
+	//struct file_info f;
 	memcpy(f.user, username);
 	memcpy(f.name, filename);
 	f.data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
-	// append to memory
-	fprintf(mem, "%s", f.user);
-	fprintf(mem, "%s", f.name);
-	fprintf(mem, "%s", f.data);
+	// TODO: Insert file in next free space. Do this after implementing delete
+	int mem = open(vm_filename, O_RDWR);
+	lseek(mem, -1, SEEK_END);
+	// TODO: check if memory is full
+	printf("\nsize of vm: %s\n", mem);
+	write(mem, &f, sizeof(f));
+
+	printf("user: %s created file: %s\n", f.user, f.name);
+	printf("size of vm: %s\n", mem);
+	close(mem);
+	return f;
 }
 
 /*
@@ -181,16 +179,32 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 	result.out_msg.out_msg_len=10;
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-        strcpy(result.out_msg.out_msg_val, (*argp).file_name);
+  strcpy(result.out_msg.out_msg_val, (*argp).file_name);
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
 	//	fflush((FILE *) 1);
 
-	create_file(argp->user_name, argp->file_name);
+	// TODO: create a file then read it just to make sure this is all good and dandy.
+	// No need to enforce checking, lets just get files saved and read.
+	//TODO: check if file exists or is open before creating
+	struct file_info file;
+  struct table_entry entry;
+	entry.block_id = create_file(argp->user_name, argp->file_name, &file);
+	entry.fd = 20;
+	entry.op = 0;
+	// for now just append to the file table
+	// open the file aka add it to file table
+	int table = open(ft_filename, O_RDWR);
+	// TODO: check if file table is full
+	// TODO: fill in next available entry
+	lseek(table, 0, SEEK_END);
+	write(table, &entry, sizeof(entry))
+	close(table);
 	// check if file exists
 	// check if file is already open
 	// add file to file table
 
+	is_file_open(argp->user_name, argp->file_name);
 	return &result;
 }
 
