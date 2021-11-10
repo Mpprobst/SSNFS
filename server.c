@@ -64,20 +64,8 @@ void init_disk() {
 	 printf("file table created.\n");
  }
 
-<<<<<<< HEAD
  close(vm);
  close(ft);
-=======
- int dict = fopen(dict_filename, O_RDONLY);
- if (dict < 0) {
-	 dict = fopen(dict_filename, O_RDWR);
-	 printf("file dictionary created.\n")
- }
-
- fclose(vm);
- fclose(ft);
- fclose(fd);
->>>>>>> de098354669f7b98a770b5b9243d6a7ab8b90049
 }
 
 
