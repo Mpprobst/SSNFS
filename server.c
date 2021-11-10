@@ -30,8 +30,7 @@ const char * ft_filename = "file_table.dat";
 //char * dict_filename = "file_dict.dat";
 
 struct table_entry {
-	int block_id;	// id of block at which file starts
-	//int fd;				// file descriptor
+	int fd;				// file descriptor - where in vm file is
 	int fp;				// location of file pointer
 	int op;				// operation id. what user is doing to file: 0-open, 1-read, 2-write
 };
@@ -91,7 +90,7 @@ struct table_entry is_file_open(char * username, char * filename) {
 	// check if the file is open in the file table
 	for (; read(table, &entry, sizeof(entry)) > 0;) {
 		// seek to location of entry.
-		int loc = entry.block_id;// * BLOCK_SIZE * FILE_SIZE;
+		int loc = entry.fd;// * BLOCK_SIZE * FILE_SIZE;
 		lseek(mem, loc, SEEK_SET);
 		read(mem, &info, 20);	// only read username and filename at first
 		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
@@ -116,25 +115,28 @@ int file_exists(char * username, char * filename) {
 
 /*
 creates a file and adds it to the dictionary of files.
-returns: file descriptor of new file
+returns: file descriptor of new file (location of where file was stored)
 */
 int create_file(char * username, char * filename, struct file_info * f) {
 	//struct file_info f;
 	memcpy(f->user, username, 10);
 	memcpy(f->name, filename, 10);
-	//f->data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
 	// TODO: Insert file in next free space. Do this after implementing delete
 	int mem = open(vm_filename, O_RDWR);
-	int size = lseek(mem, 0, SEEK_END);
+	int loc = lseek(mem, 0, SEEK_END);
 	// TODO: check if memory is full
-	int block_id = size;
-	printf("\nfile size = %d size of vm: %d\n", sizeof(*f), size);
+
+	printf("memory used: %d", (loc+sizeof(f))/1000000);
+	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
+		printf("")
+	}
+	printf("\nfile size = %d size of vm: %d\n", sizeof(*f), loc);
   write(mem, f, sizeof(*f));
 
 	printf("user: %s created file: %s\n", f->user, f->name);
 	printf("size of vm: %d\n", lseek(mem, 0, SEEK_END));
 	close(mem);
-	return block_id;
+	return loc;
 }
 
 /*
