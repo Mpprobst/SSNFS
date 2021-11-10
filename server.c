@@ -126,8 +126,8 @@ int create_file(char * username, char * filename, struct file_info * f) {
 	lseek(mem, -1, SEEK_END);
 	// TODO: check if memory is full
 	int block_id = mem;
-	printf("\nfile size = %d size of vm: %d\n", sizeof(f), mem);
-	write(mem, &f, sizeof(f));
+	printf("\nfile size = %d size of vm: %d\n", sizeof(*f), mem);
+	write(mem, f, sizeof(*f));
 
 	printf("user: %s created file: %s\n", f->user, f->name);
 	printf("size of vm: %d\n", mem);
