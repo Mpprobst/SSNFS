@@ -178,7 +178,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 	// check if file exists
 	// check if file is already open
 	// add file to file table
-	printf("\nattempting to open file I just made...\n")
+	printf("\nattempting to open file I just made...\n");
 	is_file_open(argp->user_name, argp->file_name);
 	return &result;
 }
