@@ -54,13 +54,13 @@ If file table exists, its state is restored (TODO)
 void init_disk() {
  int vm = open(vm_filename, O_RDONLY);
  if (vm < 0) {
-	 vm = open(vm_filename, O_RDWR);
+	 vm = open(vm_filename, O_CREAT);
 	 printf("virtual memory created.\n");
  }
 
  int ft = open(ft_filename, O_RDONLY);
  if (ft < 0) {
-	 ft = open(ft_filename, O_RDWR);
+	 ft = open(ft_filename, O_CREAT);
 	 printf("file table created.\n");
  }
 
