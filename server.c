@@ -122,7 +122,7 @@ int create_file(char * username, char * filename, struct file_info * f) {
 	//struct file_info f;
 	memcpy(f->user, username, 10);
 	memcpy(f->name, filename, 10);
-	f->data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
+	//f->data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
 	// TODO: Insert file in next free space. Do this after implementing delete
 	int mem = open(vm_filename, O_RDWR);
 	int size = lseek(mem, 0, SEEK_END);
