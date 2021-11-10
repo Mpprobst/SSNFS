@@ -31,7 +31,7 @@ const char * ft_filename = "file_table.dat";
 
 struct table_entry {
 	int block_id;	// id of block at which file starts
-	int fd;				// file descriptor
+	//int fd;				// file descriptor
 	int fp;				// location of file pointer
 	int op;				// operation id. what user is doing to file: 0-open, 1-read, 2-write
 };
@@ -125,14 +125,14 @@ int create_file(char * username, char * filename, struct file_info * f) {
 	f->data = (char*)malloc(FILE_SIZE*BLOCK_SIZE);
 	// TODO: Insert file in next free space. Do this after implementing delete
 	int mem = open(vm_filename, O_RDWR);
-	lseek(mem, -1, SEEK_END);
+	int size = lseek(mem, -1, SEEK_END);
 	// TODO: check if memory is full
-	int block_id = mem;
-	printf("\nfile size = %d size of vm: %d\n", sizeof(*f), mem);
-	write(mem, f, sizeof(*f));
+	int block_id = size;
+	printf("\nfile size = %d size of vm: %d\n", sizeof(*f), size);
+  size = write(mem, f, sizeof(*f));
 
 	printf("user: %s created file: %s\n", f->user, f->name);
-	printf("size of vm: %d\n", mem);
+	printf("size of vm: %d\n", size);
 	close(mem);
 	return block_id;
 }
@@ -162,20 +162,23 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
 	struct file_info file;
   struct table_entry entry;
 	entry.block_id = create_file(argp->user_name, argp->file_name, &file);
-	entry.fd = 20;
+	entry.fp = 20;
 	entry.op = 0;
 	// for now just append to the file table
 	// open the file aka add it to file table
 	int table = open(ft_filename, O_RDWR);
 	// TODO: check if file table is full
 	// TODO: fill in next available entry
-	lseek(table, 0, SEEK_END);
-	write(table, &entry, sizeof(entry));
+
+	int tbl_size = lseek(table, 0, SEEK_END);
+	printf("\ntable size: %d\n", tbl_size);
+	tbl_size = write(table, &entry, sizeof(entry));
+	printf("added table entry for %s/%s at block. table is now size: %d\n", file.user, file.name, entry.block_id, tbl_size);
 	close(table);
 	// check if file exists
 	// check if file is already open
 	// add file to file table
-
+	printf("\nattempting to open file I just made...\n")
 	is_file_open(argp->user_name, argp->file_name);
 	return &result;
 }
