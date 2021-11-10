@@ -43,7 +43,7 @@ struct table_entry {
 struct file_info {
   char user[10];
 	char name[10];
-	char * data;
+	char data[FILE_SIZE*BLOCK_SIZE];
 };
 
 // TODO: try storing a dictionary of which users own which files
