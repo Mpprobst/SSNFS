@@ -32,6 +32,7 @@ const char * ft_filename = "file_table.dat";
 struct table_entry {
 	int block_id;	// id of block at which file starts
 	int fd;				// file descriptor
+	int fp;				// location of file pointer
 	int op;				// operation id. what user is doing to file: 0-open, 1-read, 2-write
 };
 
@@ -93,6 +94,7 @@ struct table_entry is_file_open(char * username, char * filename) {
 		int loc = entry.block_id * BLOCK_SIZE * FILE_SIZE;
 		lseek(mem, loc, SEEK_SET);
 		read(mem, &info, 20);	// only read username and filename at first
+		print("byte: %d user: %s file: %s\n", loc, info.user, info.name);
 		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
 			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
 			break;
