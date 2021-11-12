@@ -78,10 +78,24 @@ void update_table(struct table_entry * table) {
 }
 
 /*
+given the index of where a file is located, return a file info.
+
+*/
+struct file_info get_open_file(int loc) {
+	struct file_info file;
+	int mem = open(vm_filename, O_RDONLY);
+
+	lseek(mem, loc, SEEK_SET);
+	read(mem, &file, sizeof(file));	// only read username and filename at first
+	return file;
+}
+
+/*
 check the file table if the file is already open.
-if so, return the table entry, null otherwise
+if so, return table entry
 */
 struct table_entry is_file_open(char * username, char * filename) {
+	int open = -1;
 	int table = open(ft_filename, O_RDONLY);
 	int mem = open(vm_filename, O_RDONLY);
 	struct table_entry entry;
@@ -96,31 +110,47 @@ struct table_entry is_file_open(char * username, char * filename) {
 		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
 		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
 			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
+			open = 0;
 			break;
 		}
 	}
 
 	close(table);
 	close(mem);
+	if (open == -1) {
+		entry.fd = open;
+	}
 	return entry;
 }
 
 /*
-searches virtual disk and file table for a file belonging to a specific user.
+searches virtual disk for a file belonging to a specific user.
 returns: block idx in which file exists.
 */
 int file_exists(char * username, char * filename) {
+	int exists = -1;
+	int mem = open(vm_filename, O_RDONLY);
+	struct file_info info;
 
+	for (; read(mem, &info, sizeof(info)) > 0;) {
+		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
+			exists = read(mem, &info, BLOCK_SIZE * FILE_SIZE) - sizeof(info);
+			break;
+		}
+	}
+	close(mem);
+
+	return exists;
 }
 
 /*
 creates a file and adds it to the dictionary of files.
 returns: file descriptor of new file (location of where file was stored)
 */
-int create_file(char * username, char * filename, struct file_info * f) {
-	//struct file_info f;
-	memcpy(f->user, username, 10);
-	memcpy(f->name, filename, 10);
+int create_file(char * username, char * filename) {
+	struct file_info f;
+	memcpy(f.user, username, 10);
+	memcpy(f.name, filename, 10);
 	// TODO: Insert file in next free space. Do this after implementing delete
 	int mem = open(vm_filename, O_RDWR);
 	int loc = lseek(mem, 0, SEEK_END);
@@ -128,12 +158,12 @@ int create_file(char * username, char * filename, struct file_info * f) {
 
 	printf("memory used: %d", (loc+sizeof(f))/1000000);
 	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
-		printf("")
+		printf("memory is full");
 	}
-	printf("\nfile size = %d size of vm: %d\n", sizeof(*f), loc);
-  write(mem, f, sizeof(*f));
+	printf("\nfile size = %d size of vm: %d\n", sizeof(f), loc);
+  write(mem, f, sizeof(f));
 
-	printf("user: %s created file: %s\n", f->user, f->name);
+	printf("user: %s created file: %s\n", f.user, f.name);
 	printf("size of vm: %d\n", lseek(mem, 0, SEEK_END));
 	close(mem);
 	return loc;
@@ -143,53 +173,75 @@ int create_file(char * username, char * filename, struct file_info * f) {
 Opens or creates a file of name provided by client.
 File can only be 64 blocks long and is allocated on creation
 */
-open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp)
-{
+open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	init_disk();
 
-	static open_output  result;
+	struct file_info file;
+  struct table_entry entry = is_file_open(argp->user_name, argp->file_name);
+	if (entry.fd == -1) {
+		// file isn't open get it from memory
+		int loc = file_exists(argp->user_name, argp->file_name);
+		if (loc == -1) {
+			// file does not exist, so create it
+			entry.fd = create_file(argp->user_name, argp->file_name);
+			entry.fp = 20;
+			entry.op = 0;
+			// for now just append to the file table
+		}
+		// open the file aka add it to file table
+		int table = open(ft_filename, O_RDWR);
+		// TODO: check if file table is full
+		// TODO: fill in next available entry
+		int tbl_size = lseek(table, 0, SEEK_END);
+		printf("\ntable size: %d\n", tbl_size);
+		write(table, &entry, sizeof(entry));
+		printf("added table entry for %s/%s at block %d. table is now size: %d\n", file.user, file.name, entry.fd, lseek(table, 0, SEEK_END));
+		close(table);
+	}
 
-	result.fd=20;
+	printf("\nattempting to open file I just made...\n");
+	is_file_open(argp->user_name, argp->file_name);
+
+	static open_output result;
+	result.fd=entry.fd;
 	result.out_msg.out_msg_len=10;
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
   strcpy(result.out_msg.out_msg_val, (*argp).file_name);
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
-	//	fflush((FILE *) 1);
 
-	// TODO: create a file then read it just to make sure this is all good and dandy.
-	// No need to enforce checking, lets just get files saved and read.
-	//TODO: check if file exists or is open before creating
-	struct file_info file;
-  struct table_entry entry;
-	entry.block_id = create_file(argp->user_name, argp->file_name, &file);
-	entry.fp = 20;
-	entry.op = 0;
-	// for now just append to the file table
-	// open the file aka add it to file table
-	int table = open(ft_filename, O_RDWR);
-	// TODO: check if file table is full
-	// TODO: fill in next available entry
-
-	int tbl_size = lseek(table, 0, SEEK_END);
-	printf("\ntable size: %d\n", tbl_size);
-	write(table, &entry, sizeof(entry));
-	printf("added table entry for %s/%s at block %d. table is now size: %d\n", file.user, file.name, entry.block_id, lseek(table, 0, SEEK_END));
-	close(table);
-	// check if file exists
-	// check if file is already open
-	// add file to file table
-	printf("\nattempting to open file I just made...\n");
-	is_file_open(argp->user_name, argp->file_name);
 	return &result;
 }
 
-read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp)
-{
+read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
+	init_disk();
+
+	// check if file is open. if not then do nothing and send err msg
+	struct table_entry entry = is_file_open(argp->user_name, argp->file_name);
+
 	static read_output  result;
 
+	result.fd=20;
+	result.out_msg.out_msg_len=38+sizeof(argp->file_name);
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 
+	printf("In server: filename recieved:%s\n",argp->file_name);
+	printf("In server username received:%s\n",argp->user_name);
+
+	if (entry.fd == -1) {
+		// file is not open
+		sprintf(result.out_msg.out_msg_val, "file: %s is not open or does not exist.", argp->file_name);
+	}
+	else {
+		// get file
+		struct file_info file = get_open_file(entry.fd);
+		result.out_msg.out_msg_len=sizeof(file.data);
+		//free(result.out_mst.out_msg_val);
+		strcpy(result.out_msg.out_msg_val, file.data);
+		printf("read file: %s from user %s", argp->file_name, argp->user_name);
+	}
 
 	return &result;
 }
