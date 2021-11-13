@@ -176,7 +176,7 @@ int create_file(char * username, char * filename) {
 
 	printf("memory used: %.2f of %d\n", ((double)loc+sizeof(f))/1000000, DISK_SIZE);
 	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
-		printf("memory is full");
+		printf("memory is full!\n");
 	}
   write(mem, &f, sizeof(f));
 
@@ -260,7 +260,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		memcpy(buffer, &file.data+(entry.fp), num_bytes_to_read-1);
 		entry.fp+=num_bytes_to_read;
 		entry.op = 1;
-		
+
 		result.out_msg.out_msg_len=num_bytes_to_read;
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		memcpy(result.out_msg.out_msg_val, buffer, num_bytes_to_read);

@@ -43,7 +43,7 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
-	printf("client attempting to write to %d", fd);
+	printf("client attempting to write\n");
 	write_output *result_3;
 	write_input write_file_1_arg;
 	write_file_1_arg.fd = fd;
@@ -117,8 +117,8 @@ int main (int argc, char *argv[])
 	int fd1 = Open("myfile");
 	printf("File descriptor returnd inside main() is:%d\n",  fd1);
 
-	char message[50] = "this is my file.\n it only prints half.\n";
-	Write(fd1, message, 18);
+	//char message[50] = "this is my file.\n it only prints half.\n";
+	Write(fd1, "this is my file.\n it only prints half.\n", 18);
 
 	int fd2 = Open("secret");
 	printf("File descriptor returnd inside main() is:%d\n",  fd2);
