@@ -121,8 +121,8 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 		read(mem, &info, 20);	// only read username and filename at first
 		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
 		if ((strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) || fd == entry.fd) {
-			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
 			isopen = 0;
+			lseek(mem, 0, SEEK_SET);
 			break;
 		}
 	}
@@ -245,6 +245,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	else {
 		// get file
 		struct file_info file = get_open_file(entry.fd);
+		printf("file %s exists.", file.name);
 		// don't read past file size
 		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp;	// can use full filesize because entry.fp initialized to 20
 		if (available_space < num_bytes_to_read) {
