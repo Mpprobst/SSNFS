@@ -97,11 +97,12 @@ struct file_info get_open_file(int loc) {
 	printf("getting open file at block: %d\n", loc);
 	struct file_info file;
 	int mem = open(vm_filename, O_RDONLY);
-	//printf("opened memory\n");
+	printf("opened memory\n");
 	lseek(mem, loc, SEEK_SET);
-	read(mem, &file, FILE_SIZE*BLOCK_SIZE);	// only read username and filename at first
-	printf("size of memory: %ds size of file: %d", lseek(mem, 0, SEEK_END), sizeof(file));
+	read(mem, &file, FILE_SIZE*BLOCK_SIZE-1);	// only read username and filename at first
+	//printf("size of memory: %ds size of file: %d\n", lseek(mem, 0, SEEK_END), sizeof(file));
 	close(mem);
+	printf("got the open file\n")
 	return file;
 }
 
@@ -305,7 +306,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		write(mem, argp->buffer.buffer_val, num_bytes_to_write);
 		entry.fp+=num_bytes_to_write;
 		entry.op = 2;
-		char * message;
+		char message[512];
 		sprintf(message, "%d bytes written to %s\n", num_bytes_to_write, file.name);
 		result.out_msg.out_msg_len=sizeof(message);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
