@@ -135,6 +135,7 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 	if (isopen == -1) {
 		entry.fd = isopen;
 	}
+	printf("found entry-> fd:%d, fp:%d, op:%d", entry.fd, entry.fp, entry.op);
 	return entry;
 }
 
@@ -237,7 +238,6 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 
 	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
 	int num_bytes_to_read = argp->numbytes;
-	printf("found entry-> fd:%d, fp:%d, op:%d", entry.fd, entry.fp, entry.op);
 	if (entry.fd == -1) {
 		// file is not open
 		char * message = "file with given descriptor is not open or does not exist.\n";
@@ -275,7 +275,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
 	static write_output  result;
 	free(result.out_msg.out_msg_val);
-	printf("user: %s requesting to read file with descriptor: %d\n", argp->user_name, argp->fd);
+	printf("user: %s requesting to write to file with descriptor: %d\n", argp->user_name, argp->fd);
 
 	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
 	int num_bytes_to_write = argp->numbytes;
