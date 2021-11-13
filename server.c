@@ -248,15 +248,15 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		struct file_info file = get_open_file(entry.fd);
 		printf("file: %s exists.\n", file.name);
 		// don't read past file size
-		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp;	// can use full filesize because entry.fp initialized to 20
+		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp-1;	// can use full filesize because entry.fp initialized to 20
 		if (available_space < num_bytes_to_read) {
 			num_bytes_to_read = available_space;
 		}
 
 		char * buf = &file.data[entry.fp];
-		printf("made buf at file pointer\n");
+		printf("made buf at file pointer %s\n", buf);
 		char * buffer = (char*)malloc(num_bytes_to_read);
-		printf("buffer allocated\n");
+		printf("buffer allocated %d bytes\n", sizeof(num_bytes_to_read));
 		memcpy(buffer, &file.data[entry.fp], num_bytes_to_read);
 		entry.fp+=num_bytes_to_read;
 		entry.op = 1;
