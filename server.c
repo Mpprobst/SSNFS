@@ -73,8 +73,20 @@ void init_disk() {
 given a table, write to the file table file.
 called at the end of rpc operations that modify the table
 */
-void update_table(struct table_entry * table) {
+void update_table(struct table_entry changed_entry) {
+	int table = open(ft_filename, O_RDWR);
+	struct table_entry entry;
 
+	for (; read(table, &entry, sizeof(entry)) > 0;) {
+		// seek to location of entry.
+		if (entry.fd == changed_entry.fd) {
+			lseek(table, -sizeof(entry), SEEK_CUR);
+			write(table, &changed_entry, sizeof(changed_entry));
+			break;
+		}
+	}
+	
+	close(table);
 }
 
 /*
@@ -218,29 +230,42 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	init_disk();
 
 	// check if file is open. if not then do nothing and send err msg
-	struct table_entry entry = is_file_open(argp->user_name, argp->file_name);
-
 	static read_output  result;
 
 	result.fd=20;
-	result.out_msg.out_msg_len=38+sizeof(argp->file_name);
 	free(result.out_msg.out_msg_val);
-	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
 
+	struct table_entry entry = is_file_open(argp->user_name, argp->file_name);
+	int num_bytes_to_read = argp->numbytes;
+
 	if (entry.fd == -1) {
 		// file is not open
+		result.out_msg.out_msg_len=38+sizeof(argp->file_name);
+		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		sprintf(result.out_msg.out_msg_val, "file: %s is not open or does not exist.", argp->file_name);
 	}
 	else {
 		// get file
 		struct file_info file = get_open_file(entry.fd);
-		result.out_msg.out_msg_len=sizeof(file.data);
-		//free(result.out_mst.out_msg_val);
-		strcpy(result.out_msg.out_msg_val, file.data);
+		// don't read past file size
+		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp;	// can use full filesize because entry.fp initialized to 20
+		if (available_space < num_bytes_to_read) {
+			num_bytes_to_read = available_space;
+		}
+
+		char * buffer = (char *)malloc(num_bytes_to_read);
+		memcpy(buffer, &file.data[entry.fp], num_bytes_to_read);
+		entry.fp+=num_bytes_to_read;
+
+		result.out_msg.out_msg_len=num_bytes_to_read;
+		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
+		strcpy(result.out_msg.out_msg_val, buffer);
 		printf("read file: %s from user %s", argp->file_name, argp->user_name);
+
+		// update the file table and save the new fp
 	}
 
 	return &result;

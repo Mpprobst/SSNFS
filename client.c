@@ -26,7 +26,7 @@ clnt = clnt_create (host, SSNFSPROG, SSNFSVER, "tcp");
 /*
 Open: opens a file with the given name in the user's directory. If file does
 not exist, it is created. If file cannot be opened or created, return -1 as an
-indicator of error. 
+indicator of error.
 returns: file descriptor of opened file.
 */
 int Open(char *filename_to_open){
@@ -42,18 +42,23 @@ int Open(char *filename_to_open){
 	return  result_1->fd;
 }
 
-void Write(int fd, char * buffer, int num_bytes_to_write){
-write_output  *result_3;
-write_input  write_file_1_arg;
+void Write(char * filename, char * buffer, int num_bytes_to_write){
+write_output *result_3;
+write_input write_file_1_arg;
 result_3 = write_file_1(&write_file_1_arg, clnt);
 	if (result_3 == (write_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
 }
 
-void Read(int fd, char * buffer, int num_bytes_to_read){
-        read_output  *result_2;
+void Read(char * filename, char * buffer, int num_bytes_to_read){
+  read_output  *result_2;
 	read_input  read_file_1_arg;
+	// ask server to read the file I own with a
+	strcpy(read_file_1_arg.user_name, getpwuid(getuid())->pw_name);
+	strcpy(read_file_1_arg.file_name, filename);
+	read_file_1_arg.numbytes = num_bytes_to_read;
+
 	result_2 = read_file_1(&read_file_1_arg, clnt);
 	if (result_2 == (read_output *) NULL) {
 		clnt_perror (clnt, "call failed");
