@@ -173,7 +173,7 @@ int create_file(char * username, char * filename) {
 		printf("memory is full");
 	}
 	printf("\nfile size = %d size of vm: %d\n", sizeof(f), loc);
-  write(mem, f, sizeof(f));
+  write(mem, &f, sizeof(f));
 
 	printf("user: %s created file: %s\n", f.user, f.name);
 	printf("size of vm: %d\n", lseek(mem, 0, SEEK_END));
