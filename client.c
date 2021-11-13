@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
 	int fd1 = Open("myfile");
 	printf("File descriptor returnd inside main() is:%d\n",  fd1);
 
-	char * message = "this is my file.\n it only prints half.\n";
+	char message[] = "this is my file.\n it only prints half.\n";
 	Write(fd1, message, 18);
 
 	int fd2 = Open("secret");
