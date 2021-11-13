@@ -201,7 +201,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		if (loc == -1) {
 			// file does not exist, so create it
 			entry.fd = create_file(argp->user_name, argp->file_name);
-			entry.fp = 20;
+			entry.fp = 0;
 			entry.op = 0;
 			// for now just append to the file table
 		}
@@ -248,7 +248,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		struct file_info file = get_open_file(entry.fd);
 		printf("file: %s exists.\n", file.name);
 		// don't read past file size
-		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp-1;	// can use full filesize because entry.fp initialized to 20
+		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp - 20;	// can use full filesize because entry.fp initialized to 20
 		if (available_space < num_bytes_to_read) {
 			num_bytes_to_read = available_space;
 		}
@@ -258,7 +258,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 
 		char * buffer = malloc(num_bytes_to_read);
 		printf("buffer allocated %d bytes\n", sizeof(buffer));
-		memcpy(buffer, &file.data+entry.fp, sizeof(buffer));
+		memcpy(buffer, &file.data+(entry.fp), sizeof(buffer));
 		//memcpy(buffer, file.data[entry.fp], num_bytes_to_read);
 		entry.fp+=num_bytes_to_read;
 		entry.op = 1;
@@ -297,7 +297,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		// get file
 		struct file_info file = get_open_file(entry.fd);
 		// don't read past file size
-		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp-1;	// can use full filesize because entry.fp initialized to 20
+		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp - 20; // total file size needs to be subtracted by 20
 		printf("want to write %d bytes into available space = %d\n", num_bytes_to_write, available_space);
 		if (available_space < num_bytes_to_write) {
 			num_bytes_to_write = available_space;
