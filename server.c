@@ -299,7 +299,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		struct file_info file = get_open_file(entry.fd);
 		// don't read past file size
 		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp-1;	// can use full filesize because entry.fp initialized to 20
-		printf("want to write %d into available space = %d", num_bytes_to_write, available_space);
+		printf("want to write %d into available space = %d\n", num_bytes_to_write, available_space);
 		if (available_space < num_bytes_to_write) {
 			num_bytes_to_write = available_space;
 		}
@@ -317,7 +317,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, message);
 		printf("user %s wrote %d bytes to file: %s\n", file.user, num_bytes_to_write, file.name);
-		printf("done writing");
+		printf("done writing\n");
 		// update the file table and save the new fp
 		update_table(entry);
 	}
