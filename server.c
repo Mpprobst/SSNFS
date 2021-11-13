@@ -94,11 +94,12 @@ given the index of where a file is located, return a file info.
 
 */
 struct file_info get_open_file(int loc) {
+	printf("getting open file at block: %d", loc);
 	struct file_info file;
 	int mem = open(vm_filename, O_RDONLY);
-
 	lseek(mem, loc, SEEK_SET);
 	read(mem, &file, sizeof(file));	// only read username and filename at first
+	close(mem);
 	return file;
 }
 
