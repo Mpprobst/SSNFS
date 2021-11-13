@@ -174,7 +174,7 @@ int create_file(char * username, char * filename) {
 	int loc = lseek(mem, 0, SEEK_END);
 	// TODO: check if memory is full
 
-	printf("memory used: %.2f of %d", ((double)loc+sizeof(f))/1000000, DISK_SIZE);
+	printf("memory used: %.2f of %d\n", ((double)loc+sizeof(f))/1000000, DISK_SIZE);
 	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
 		printf("memory is full");
 	}
@@ -194,7 +194,6 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
 
-	struct file_info file;
   struct table_entry entry = is_file_open(argp->user_name, argp->file_name, -1);
 	if (entry.fd == -1) {
 		// file isn't open get it from memory
@@ -212,7 +211,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		// TODO: fill in next available entry
 		int tbl_size = lseek(table, 0, SEEK_END);
 		write(table, &entry, sizeof(entry));
-		printf("added table entry for %s/%s at block %d. table is now size: %d\n", file.user, file.name, entry.fd, lseek(table, 0, SEEK_END));
+		printf("added table entry for %s/%s at block %d. table is now size: %d\n", argp->user_name, argp->file_name, entry.fd, lseek(table, 0, SEEK_END));
 		close(table);
 	}
 
@@ -247,14 +246,14 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	else {
 		// get file
 		struct file_info file = get_open_file(entry.fd);
-		printf("file %s exists.\n", file.name);
+		printf("file: %s exists.\n", file.name);
 		// don't read past file size
 		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp;	// can use full filesize because entry.fp initialized to 20
 		if (available_space < num_bytes_to_read) {
 			num_bytes_to_read = available_space;
 		}
 
-		char * buffer;
+		char * buffer = (char*)malloc(num_bytes_to_read);
 		memcpy(buffer, &file.data[entry.fp], num_bytes_to_read);
 		entry.fp+=num_bytes_to_read;
 		entry.op = 1;
@@ -307,12 +306,11 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		entry.op = 2;
 		char * message = (char *)malloc(512);
 		sprintf(message, "%d bytes written to %s\n", num_bytes_to_write, file.name);
-		printf("created message: %s\n", message);
 		result.out_msg.out_msg_len=sizeof(message);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, message);
+		printf("created message: %s\n", result.out_msg.out_msg_val);
 		printf("user %s wrote %d bytes to file: %s\n", file.user, num_bytes_to_write, file.name);
-		printf("done writing\n");
 		// update the file table and save the new fp
 		update_table(entry);
 	}
