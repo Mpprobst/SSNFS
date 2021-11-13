@@ -302,7 +302,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		}
 
 		int mem = open(vm_filename, O_RDWR);
-		lseek(mem, entry.fd+entry.fp, SEEK_SET);
+		lseek(mem, entry.fd+entry.fp+20, SEEK_SET);
 		write(mem, argp->buffer.buffer_val, num_bytes_to_write);
 		printf("memory written\n");
 		entry.fp+=num_bytes_to_write;
