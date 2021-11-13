@@ -256,7 +256,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			num_bytes_to_read = sizeof(file.data);
 		}
 
-		char * buffer = malloc(num_bytes_to_read);
+		char buffer[num_bytes_to_read];
 		printf("buffer allocated %d bytes, reading %d bytes of file with size %d\n", sizeof(buffer), num_bytes_to_read, sizeof(file.data));
 		printf("what is fp pointing to? %d", &file.data+entry.fp);
 		memcpy(buffer, &file.data+(entry.fp), num_bytes_to_read-1);
