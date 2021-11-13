@@ -240,7 +240,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		char * message = "file with given descriptor is not open or does not exist.\n";
 		result.out_msg.out_msg_len=sizeof(message);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-		sprintf(result.out_msg.out_msg_val, );
+		strcpy(result.out_msg.out_msg_val, message);
 	}
 	else {
 		// get file
