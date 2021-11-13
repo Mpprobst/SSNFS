@@ -74,7 +74,9 @@ given a table, write to the file table file.
 called at the end of rpc operations that modify the table
 */
 void update_table(struct table_entry changed_entry) {
+	printf("updating table\n");
 	int table = open(ft_filename, O_RDWR);
+	lseek(table, 0, SEEK_SET);
 	struct table_entry entry;
 
 	for (; read(table, &entry, sizeof(entry)) > 0;) {
@@ -117,6 +119,7 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 	struct table_entry entry;
 	struct file_info info;
 
+	lseek(table, 0, SEEK_SET);
 	// check if the file is open in the file table
 	for (; read(table, &entry, sizeof(entry)) > 0;) {
 		// seek to location of entry.
@@ -304,15 +307,17 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		int mem = open(vm_filename, O_RDWR);
 		lseek(mem, entry.fd+entry.fp, SEEK_SET);
 		write(mem, argp->buffer.buffer_val, num_bytes_to_write);
+		printf("memory written\n");
 		entry.fp+=num_bytes_to_write;
 		entry.op = 2;
-		char message[512];
+		char * message = (char *)malloc(512);
 		sprintf(message, "%d bytes written to %s\n", num_bytes_to_write, file.name);
+		printf("created message\n");
 		result.out_msg.out_msg_len=sizeof(message);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, message);
 		printf("user %s wrote %d bytes to file: %s\n", file.user, num_bytes_to_write, file.name);
-
+		printf("done writing");
 		// update the file table and save the new fp
 		update_table(entry);
 	}
