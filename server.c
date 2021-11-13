@@ -270,7 +270,42 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
 	static write_output  result;
+	free(result.out_msg.out_msg_val);
+	printf("user: %s requesting to read file with descriptor: %d\n", argp->user_name, argp->fd);
 
+	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
+	int num_bytes_to_write = argp->numbytes;
+
+	if (entry.fd == -1) {
+		// file is not open
+		char * message = "file with given descriptor is not open or does not exist.\n";
+		result.out_msg.out_msg_len=sizeof(message);
+		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
+		strcpy(result.out_msg.out_msg_val, message);
+	}
+	else {
+		// get file
+		struct file_info file = get_open_file(entry.fd);
+		// don't read past file size
+		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp;	// can use full filesize because entry.fp initialized to 20
+		if (available_space < num_bytes_to_write) {
+			num_bytes_to_write = available_space;
+		}
+
+		int mem = open(vm_filename, O_RDWR);
+		lseek(mem, entry.fd+entry.fp, SEEK_SET);
+		wirte(mem, argp->buffer.buffer_val, num_bytes_to_write);
+		entry.fp+=num_bytes_to_write;
+
+		char * message;
+		sprintf(message, "%d bytes written to %s\n", num_bytes_to_write, file.name);
+		result.out_msg.out_msg_len=sizeof(message);
+		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
+		strcpy(result.out_msg.out_msg_val, message);
+		printf("user %s wrote %d bytes to file: %s\n", file.user, num_bytes_to_write, file.name);
+
+		// update the file table and save the new fp
+		update_table(entry);
 
 
 	return &result;
