@@ -97,11 +97,10 @@ struct file_info get_open_file(int loc) {
 	printf("getting open file at block: %d\n", loc);
 	struct file_info file;
 	int mem = open(vm_filename, O_RDONLY);
-	printf("opened memory\n");
-	//printf("size of memory: %ds size of file: %d", lseek(mem, 0, SEEK_END), sizeof(file));
+	//printf("opened memory\n");
 	lseek(mem, loc, SEEK_SET);
-	read(mem, &file, sizeof(file)-1);	// only read username and filename at first
-	lseek(mem, 0, SEEK_SET);
+	read(mem, &file, FILE_SIZE*BLOCK_SIZE);	// only read username and filename at first
+	printf("size of memory: %ds size of file: %d", lseek(mem, 0, SEEK_END), sizeof(file));
 	close(mem);
 	return file;
 }
