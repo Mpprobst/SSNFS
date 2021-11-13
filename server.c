@@ -129,7 +129,7 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 			break;
 		}
 	}
-	
+
 	lseek(mem, 0, SEEK_SET);
 	close(table);
 	close(mem);
@@ -274,6 +274,8 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 
 write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
+	init_disk();
+	
 	static write_output  result;
 	free(result.out_msg.out_msg_val);
 	printf("user: %s requesting to write to file with descriptor: %d\n", argp->user_name, argp->fd);
