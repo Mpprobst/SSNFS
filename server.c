@@ -275,7 +275,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
-	
+
 	static write_output  result;
 	free(result.out_msg.out_msg_val);
 	printf("user: %s requesting to write to file with descriptor: %d\n", argp->user_name, argp->fd);
@@ -294,7 +294,8 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		// get file
 		struct file_info file = get_open_file(entry.fd);
 		// don't read past file size
-		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp;	// can use full filesize because entry.fp initialized to 20
+		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp-1;	// can use full filesize because entry.fp initialized to 20
+		printf("want to write %d into available space = %d", num_bytes_to_write, available_space);
 		if (available_space < num_bytes_to_write) {
 			num_bytes_to_write = available_space;
 		}
