@@ -43,21 +43,21 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
-write_output *result_3;
-write_input write_file_1_arg;
-write_file_1_arg.fd = fd;
-strcpy(write_file_1_arg.user_name, getpwuid(getuid())->pw_name);
-strcpy(write_file_1_arg.buffer.buffer_val, buffer);
-write_file_1_arg.buffer.buffer_len = sizeof(buffer);
-result_3 = write_file_1(&write_file_1_arg, clnt);
-	if (result_3 == (write_output *) NULL) {
-		clnt_perror (clnt, "call failed");
-	}
-printf("client receive reply\n");
+	write_output *result_3;
+	write_input write_file_1_arg;
+	write_file_1_arg.fd = fd;
+	strcpy(write_file_1_arg.user_name, getpwuid(getuid())->pw_name);
+	strcpy(write_file_1_arg.buffer.buffer_val, buffer);
+	write_file_1_arg.buffer.buffer_len = num_bytes_to_write;
+	result_3 = write_file_1(&write_file_1_arg, clnt);
+		if (result_3 == (write_output *) NULL) {
+			clnt_perror (clnt, "call failed");
+		}
+	printf("client receive reply\n");
 
-buffer = (char *)malloc(result_3->out_msg.out_msg_len);
-strcpy(buffer, result_3->out_msg.out_msg_val);
-printf("%s\n", result_3->out_msg.out_msg_val);
+	buffer = (char *)malloc(result_3->out_msg.out_msg_len);
+	strcpy(buffer, result_3->out_msg.out_msg_val);
+	printf("%s\n", result_3->out_msg.out_msg_val);
 }
 
 void Read(int fd, char * buffer, int num_bytes_to_read){
@@ -112,10 +112,12 @@ int main (int argc, char *argv[])
 	}
 	host = argv[1];
 	ssnfsprog_1 (host);
+
 	int fd1 = Open("myfile");
 	printf("File descriptor returnd inside main() is:%d\n",  fd1);
-	char * message = "this is my file.";
-	Write(fd1, message, sizeof(message));
+
+	char * message = "this is my file.\n it only prints half.\n";
+	Write(fd1, message, 18);
 
 	int fd2 = Open("secret");
 	printf("File descriptor returnd inside main() is:%d\n",  fd2);
