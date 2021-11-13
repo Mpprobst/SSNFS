@@ -112,18 +112,18 @@ int main (int argc, char *argv[])
 	}
 	host = argv[1];
 	ssnfsprog_1 (host);
-	int fd=Open("myfile");
-	printf("File descriptor returnd inside main() is:%d\n",  fd);
+	int fd1 = Open("myfile");
+	printf("File descriptor returnd inside main() is:%d\n",  fd1);
 	char * message = "this is my file.";
-	Write(fd, message, sizeof(message));
+	Write(fd1, message, sizeof(message));
 
-	fd = Open("secret");
-	printf("File descriptor returnd inside main() is:%d\n",  fd);
+	int fd2 = Open("secret");
+	printf("File descriptor returnd inside main() is:%d\n",  fd2);
 
 	int bytes_to_read = 20;
 	char *buffer = (char*)malloc(bytes_to_read);
-	Read(fd, buffer, bytes_to_read);
-	printf("Reading fd %d:\n%s", fd, buffer);
+	Read(fd1, buffer, bytes_to_read);
+	printf("Reading fd %d:\n%s", fd1, buffer);
 
 
 exit (0);
