@@ -232,7 +232,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	static read_output  result;
 
 	free(result.out_msg.out_msg_val);
-	printf("user: %s requesting to read file with descriptor: %d\n", argp->user_name, argp->fd);
+	printf("user: %s requesting to read %d bytes from fd: %d\n", argp->user_name, argp->numbytes, argp->fd);
 
 	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
 	int num_bytes_to_read = argp->numbytes;
@@ -252,16 +252,20 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		if (available_space < num_bytes_to_read) {
 			num_bytes_to_read = available_space;
 		}
+		if (num_bytes_to_read >= sizeof(file.data)) {
+			num_bytes_to_read = sizeof(file.data)-1;
+		}
 
 		char * buffer = malloc(num_bytes_to_read);
-		printf("buffer allocated %d bytes\n", sizeof(buffer));
-		memcpy(buffer, file.data[entry.fp], num_bytes_to_read);
+		memcpy(buffer, &file.data+entry.fp, num_bytes_to_read);
+		//printf("buffer allocated %d bytes\n", sizeof(buffer));
+		//memcpy(buffer, file.data[entry.fp], num_bytes_to_read);
 		entry.fp+=num_bytes_to_read;
 		entry.op = 1;
-		printf("prepared buffer: %s\b", buffer);
+		//printf("prepared buffer: %s\b", buffer);
 		result.out_msg.out_msg_len=num_bytes_to_read;
-		//result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-		strcpy(result.out_msg.out_msg_val, buffer);
+		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
+		memcpy(result.out_msg.out_msg_val, buffer, num_bytes_to_read);
 		printf("read file: %s from user %s\n", file.name, file.user);
 
 		// update the file table and save the new fp
