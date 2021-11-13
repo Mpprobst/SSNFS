@@ -85,7 +85,7 @@ void update_table(struct table_entry changed_entry) {
 			break;
 		}
 	}
-	
+
 	close(table);
 }
 
@@ -103,10 +103,10 @@ struct file_info get_open_file(int loc) {
 }
 
 /*
-check the file table if the file is already open.
+check the file table if the file is already open. optionally enter the file descriptor
 if so, return table entry
 */
-struct table_entry is_file_open(char * username, char * filename) {
+struct table_entry is_file_open(char * username, char * filename, int fd) {
 	int isopen = -1;
 	int table = open(ft_filename, O_RDONLY);
 	int mem = open(vm_filename, O_RDONLY);
@@ -120,7 +120,7 @@ struct table_entry is_file_open(char * username, char * filename) {
 		lseek(mem, loc, SEEK_SET);
 		read(mem, &info, 20);	// only read username and filename at first
 		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
-		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
+		if ((strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) || fd == entry.fd) {
 			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
 			isopen = 0;
 			break;
@@ -238,7 +238,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
 
-	struct table_entry entry = is_file_open(argp->user_name, argp->file_name);
+	struct table_entry entry = is_file_open(argp->user_name, argp->file_name, argp->fd);
 	int num_bytes_to_read = argp->numbytes;
 
 	if (entry.fd == -1) {
@@ -266,6 +266,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		printf("read file: %s from user %s", argp->file_name, argp->user_name);
 
 		// update the file table and save the new fp
+		update_table(entry);
 	}
 
 	return &result;
