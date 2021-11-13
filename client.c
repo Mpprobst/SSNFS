@@ -54,8 +54,8 @@ result_3 = write_file_1(&write_file_1_arg, clnt);
 		clnt_perror (clnt, "call failed");
 	}
 
-strcpy(buffer, result_3.out_msg.out_msg_val);
-printf("%s", result_3.out_msg.out_msg_val);
+strcpy(buffer, result_3->out_msg.out_msg_val);
+printf("%s", result_3->out_msg.out_msg_val);
 
 }
 
@@ -71,7 +71,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 	if (result_2 == (read_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	memcpy(buffer, result_2.out_msg.out_msg_val);
+	memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
 }
 
 void Close(int fd){
@@ -116,7 +116,7 @@ int main (int argc, char *argv[])
 	char * message = "this is my file.";
 	Write(fd, message, sizeof(message));
 
-	int fd = Open("secret");
+	fd = Open("secret");
 	printf("File descriptor returnd inside main() is:%d\n",  fd);
 
 	int bytes_to_read = 20;
