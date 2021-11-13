@@ -104,7 +104,7 @@ struct file_info get_open_file(int loc) {
 	read(mem, &file, FILE_SIZE*BLOCK_SIZE-1);	// only read username and filename at first
 	//printf("size of memory: %ds size of file: %d\n", lseek(mem, 0, SEEK_END), sizeof(file));
 	close(mem);
-	printf("got the open file\n")
+	printf("got the open file\n");
 	return file;
 }
 
@@ -299,7 +299,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		struct file_info file = get_open_file(entry.fd);
 		// don't read past file size
 		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp-1;	// can use full filesize because entry.fp initialized to 20
-		printf("want to write %d into available space = %d\n", num_bytes_to_write, available_space);
+		printf("want to write %d bytes into available space = %d\n", num_bytes_to_write, available_space);
 		if (available_space < num_bytes_to_write) {
 			num_bytes_to_write = available_space;
 		}
