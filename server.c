@@ -258,11 +258,11 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 
 		char * buffer = malloc(num_bytes_to_read);
 		memcpy(buffer, &file.data+entry.fp, num_bytes_to_read);
-		//printf("buffer allocated %d bytes\n", sizeof(buffer));
+		printf("buffer allocated %d bytes\n", sizeof(buffer));
 		//memcpy(buffer, file.data[entry.fp], num_bytes_to_read);
 		entry.fp+=num_bytes_to_read;
 		entry.op = 1;
-		//printf("prepared buffer: %s\b", buffer);
+		printf("prepared buffer: %s\b", buffer);
 		result.out_msg.out_msg_len=num_bytes_to_read;
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		memcpy(result.out_msg.out_msg_val, buffer, num_bytes_to_read);
