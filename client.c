@@ -43,6 +43,7 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
+	printf("client attempting to write to %d", fd);
 	write_output *result_3;
 	write_input write_file_1_arg;
 	write_file_1_arg.fd = fd;
