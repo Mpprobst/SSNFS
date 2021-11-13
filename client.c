@@ -54,10 +54,10 @@ result_3 = write_file_1(&write_file_1_arg, clnt);
 		clnt_perror (clnt, "call failed");
 	}
 printf("client receive reply\n");
-free(buffer);
+
 buffer = (char *)malloc(result_3->out_msg.out_msg_len);
 strcpy(buffer, result_3->out_msg.out_msg_val);
-printf("%s", result_3->out_msg.out_msg_val);
+printf("%s\n", result_3->out_msg.out_msg_val);
 }
 
 void Read(int fd, char * buffer, int num_bytes_to_read){

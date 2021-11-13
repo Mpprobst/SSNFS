@@ -55,13 +55,11 @@ void init_disk() {
  int vm = open(vm_filename, O_RDONLY);
  if (vm < 0) {
 	 vm = open(vm_filename, O_CREAT);
-	 printf("virtual memory created.\n");
  }
 
  int ft = open(ft_filename, O_RDONLY);
  if (ft < 0) {
 	 ft = open(ft_filename, O_CREAT);
-	 printf("file table created.\n");
  }
 
  close(vm);
@@ -74,7 +72,6 @@ given a table, write to the file table file.
 called at the end of rpc operations that modify the table
 */
 void update_table(struct table_entry changed_entry) {
-	printf("updating table\n");
 	int table = open(ft_filename, O_RDWR);
 	lseek(table, 0, SEEK_SET);
 	struct table_entry entry;
@@ -96,15 +93,12 @@ given the index of where a file is located, return a file info.
 
 */
 struct file_info get_open_file(int loc) {
-	printf("getting open file at block: %d\n", loc);
 	struct file_info file;
 	int mem = open(vm_filename, O_RDONLY);
-	printf("opened memory\n");
 	lseek(mem, loc, SEEK_SET);
 	read(mem, &file, FILE_SIZE*BLOCK_SIZE-1);	// only read username and filename at first
 	//printf("size of memory: %ds size of file: %d\n", lseek(mem, 0, SEEK_END), sizeof(file));
 	close(mem);
-	printf("got the open file\n");
 	return file;
 }
 
@@ -126,9 +120,7 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 		int loc = entry.fd;// * BLOCK_SIZE * FILE_SIZE;
 		lseek(mem, loc, SEEK_SET);
 		read(mem, &info, 20);	// only read username and filename at first
-		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
 		if ((strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) || fd == entry.fd) {
-			printf("file found.\n");
 			isopen = 0;
 			break;
 		}
@@ -138,9 +130,14 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 	close(table);
 	close(mem);
 	if (isopen == -1) {
-		entry.fd = isopen;
+		entry.fd = -1;
+		entry.fp = -1;
+		entry.op = -1;
+		printf("entry not found. file is not open\n");
 	}
-	printf("found entry-> fd:%d, fp:%d, op:%d\n", entry.fd, entry.fp, entry.op);
+	else {
+		printf("found entry-> fd:%d, fp:%d, op:%d\n", entry.fd, entry.fp, entry.op);
+	}
 	return entry;
 }
 
@@ -177,15 +174,13 @@ int create_file(char * username, char * filename) {
 	int loc = lseek(mem, 0, SEEK_END);
 	// TODO: check if memory is full
 
-	printf("memory used: %d", (loc+sizeof(f))/1000000);
+	printf("memory used: %.2f of %d", ((double)loc+sizeof(f))/1000000, DISK_SIZE);
 	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
 		printf("memory is full");
 	}
-	printf("\nfile size = %d size of vm: %d\n", sizeof(f), loc);
   write(mem, &f, sizeof(f));
 
 	printf("user: %s created file: %s\n", f.user, f.name);
-	printf("size of vm: %d\n", lseek(mem, 0, SEEK_END));
 	close(mem);
 	return loc;
 }
@@ -196,6 +191,8 @@ File can only be 64 blocks long and is allocated on creation
 */
 open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	init_disk();
+	printf("In server: filename recieved:%s\n",argp->file_name);
+	printf("In server username received:%s\n",argp->user_name);
 
 	struct file_info file;
   struct table_entry entry = is_file_open(argp->user_name, argp->file_name, -1);
@@ -214,7 +211,6 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		// TODO: check if file table is full
 		// TODO: fill in next available entry
 		int tbl_size = lseek(table, 0, SEEK_END);
-		printf("\ntable size: %d\n", tbl_size);
 		write(table, &entry, sizeof(entry));
 		printf("added table entry for %s/%s at block %d. table is now size: %d\n", file.user, file.name, entry.fd, lseek(table, 0, SEEK_END));
 		close(table);
@@ -226,8 +222,6 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
   strcpy(result.out_msg.out_msg_val, (*argp).file_name);
-	printf("In server: filename recieved:%s\n",argp->file_name);
-	printf("In server username received:%s\n",argp->user_name);
 
 	return &result;
 }
@@ -260,12 +254,13 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			num_bytes_to_read = available_space;
 		}
 
-		char * buffer = (char *)malloc(num_bytes_to_read);
+		char * buffer;
 		memcpy(buffer, &file.data[entry.fp], num_bytes_to_read);
 		entry.fp+=num_bytes_to_read;
 		entry.op = 1;
+		printf("prepared buffer: %s\b", buffer);
 		result.out_msg.out_msg_len=num_bytes_to_read;
-		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
+		//result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, buffer);
 		printf("read file: %s from user %s\n", file.name, file.user);
 
@@ -312,7 +307,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		entry.op = 2;
 		char * message = (char *)malloc(512);
 		sprintf(message, "%d bytes written to %s\n", num_bytes_to_write, file.name);
-		printf("created message\n");
+		printf("created message: %s\n", message);
 		result.out_msg.out_msg_len=sizeof(message);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, message);
