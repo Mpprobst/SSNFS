@@ -189,7 +189,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	init_disk();
 
 	struct file_info file;
-  struct table_entry entry = is_file_open(argp->user_name, argp->file_name);
+  struct table_entry entry = is_file_open(argp->user_name, argp->file_name, -1);
 	if (entry.fd == -1) {
 		// file isn't open get it from memory
 		int loc = file_exists(argp->user_name, argp->file_name);
@@ -211,9 +211,6 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		close(table);
 	}
 
-	printf("\nattempting to open file I just made...\n");
-	is_file_open(argp->user_name, argp->file_name);
-
 	static open_output result;
 	result.fd=entry.fd;
 	result.out_msg.out_msg_len=10;
@@ -234,18 +231,16 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 
 	result.fd=20;
 	free(result.out_msg.out_msg_val);
+	printf("user: %s requesting to read file with descriptor: %d", argp->user_name, argp->fd);
 
-	printf("In server: filename recieved:%s\n",argp->file_name);
-	printf("In server username received:%s\n",argp->user_name);
-
-	struct table_entry entry = is_file_open(argp->user_name, argp->file_name, argp->fd);
+	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
 	int num_bytes_to_read = argp->numbytes;
 
 	if (entry.fd == -1) {
 		// file is not open
 		result.out_msg.out_msg_len=38+sizeof(argp->file_name);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-		sprintf(result.out_msg.out_msg_val, "file: %s is not open or does not exist.", argp->file_name);
+		sprintf(result.out_msg.out_msg_val, "file with given descriptor is not open or does not exist.");
 	}
 	else {
 		// get file
@@ -263,7 +258,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		result.out_msg.out_msg_len=num_bytes_to_read;
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, buffer);
-		printf("read file: %s from user %s", argp->file_name, argp->user_name);
+		printf("read file: %s from user %s", file.file_name, file.user_name);
 
 		// update the file table and save the new fp
 		update_table(entry);

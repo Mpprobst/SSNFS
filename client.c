@@ -55,7 +55,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
   read_output * result_2;
 	read_input read_file_1_arg;
 	// ask server to read the file I own with a
-	read_file_1_argv.fd = fd;
+	read_file_1_arg.fd = fd;
 	strcpy(read_file_1_arg.user_name, getpwuid(getuid())->pw_name);
 	read_file_1_arg.numbytes = num_bytes_to_read;
 
