@@ -94,7 +94,7 @@ given the index of where a file is located, return a file info.
 
 */
 struct file_info get_open_file(int loc) {
-	printf("getting open file at block: %d", loc);
+	printf("getting open file at block: %d\n", loc);
 	struct file_info file;
 	int mem = open(vm_filename, O_RDONLY);
 	lseek(mem, loc, SEEK_SET);
@@ -122,6 +122,7 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 		read(mem, &info, 20);	// only read username and filename at first
 		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
 		if ((strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) || fd == entry.fd) {
+			printf("file found.\n");
 			isopen = 0;
 			lseek(mem, 0, SEEK_SET);
 			break;
@@ -235,7 +236,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 
 	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
 	int num_bytes_to_read = argp->numbytes;
-
+	printf("found entry-> fd:%d, fp:%d, op:%d", entry.fd, entry.fp, entry.op);
 	if (entry.fd == -1) {
 		// file is not open
 		char * message = "file with given descriptor is not open or does not exist.\n";
@@ -246,7 +247,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	else {
 		// get file
 		struct file_info file = get_open_file(entry.fd);
-		printf("file %s exists.", file.name);
+		printf("file %s exists.\n", file.name);
 		// don't read past file size
 		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp;	// can use full filesize because entry.fp initialized to 20
 		if (available_space < num_bytes_to_read) {
@@ -256,7 +257,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		char * buffer = (char *)malloc(num_bytes_to_read);
 		memcpy(buffer, &file.data[entry.fp], num_bytes_to_read);
 		entry.fp+=num_bytes_to_read;
-
+		entry.op = 1;
 		result.out_msg.out_msg_len=num_bytes_to_read;
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, buffer);
@@ -298,7 +299,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		lseek(mem, entry.fd+entry.fp, SEEK_SET);
 		write(mem, argp->buffer.buffer_val, num_bytes_to_write);
 		entry.fp+=num_bytes_to_write;
-
+		entry.op = 2;
 		char * message;
 		sprintf(message, "%d bytes written to %s\n", num_bytes_to_write, file.name);
 		result.out_msg.out_msg_len=sizeof(message);
