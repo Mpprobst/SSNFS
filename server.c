@@ -294,7 +294,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 
 		int mem = open(vm_filename, O_RDWR);
 		lseek(mem, entry.fd+entry.fp, SEEK_SET);
-		wirte(mem, argp->buffer.buffer_val, num_bytes_to_write);
+		write(mem, argp->buffer.buffer_val, num_bytes_to_write);
 		entry.fp+=num_bytes_to_write;
 
 		char * message;
