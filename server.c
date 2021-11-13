@@ -95,7 +95,7 @@ check the file table if the file is already open.
 if so, return table entry
 */
 struct table_entry is_file_open(char * username, char * filename) {
-	int open = -1;
+	int isopen = -1;
 	int table = open(ft_filename, O_RDONLY);
 	int mem = open(vm_filename, O_RDONLY);
 	struct table_entry entry;
@@ -110,15 +110,15 @@ struct table_entry is_file_open(char * username, char * filename) {
 		printf("byte: %d user: %s file: %s\n", loc, info.user, info.name);
 		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
 			read(mem, &info, BLOCK_SIZE * FILE_SIZE);
-			open = 0;
+			isopen = 0;
 			break;
 		}
 	}
 
 	close(table);
 	close(mem);
-	if (open == -1) {
-		entry.fd = open;
+	if (isopen == -1) {
+		entry.fd = isopen;
 	}
 	return entry;
 }
