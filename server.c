@@ -229,18 +229,18 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	// check if file is open. if not then do nothing and send err msg
 	static read_output  result;
 
-	result.fd=20;
 	free(result.out_msg.out_msg_val);
-	printf("user: %s requesting to read file with descriptor: %d", argp->user_name, argp->fd);
+	printf("user: %s requesting to read file with descriptor: %d\n", argp->user_name, argp->fd);
 
 	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
 	int num_bytes_to_read = argp->numbytes;
 
 	if (entry.fd == -1) {
 		// file is not open
-		result.out_msg.out_msg_len=38+sizeof(argp->file_name);
+		char * message = "file with given descriptor is not open or does not exist.\n";
+		result.out_msg.out_msg_len=sizeof(message);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-		sprintf(result.out_msg.out_msg_val, "file with given descriptor is not open or does not exist.");
+		sprintf(result.out_msg.out_msg_val, );
 	}
 	else {
 		// get file
@@ -258,7 +258,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		result.out_msg.out_msg_len=num_bytes_to_read;
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, buffer);
-		printf("read file: %s from user %s", file.file_name, file.user_name);
+		printf("read file: %s from user %s\n", file.name, file.user);
 
 		// update the file table and save the new fp
 		update_table(entry);
