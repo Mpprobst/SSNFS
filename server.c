@@ -100,6 +100,7 @@ struct file_info get_open_file(int loc) {
 	printf("size of memory: %ds size of file: %d", lseek(mem, 0, SEEK_END), sizeof(file));
 	lseek(mem, loc, SEEK_SET);
 	read(mem, &file, sizeof(file)-1);	// only read username and filename at first
+	lseek(mem, 0, SEEK_SET);
 	close(mem);
 	return file;
 }
@@ -125,17 +126,17 @@ struct table_entry is_file_open(char * username, char * filename, int fd) {
 		if ((strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) || fd == entry.fd) {
 			printf("file found.\n");
 			isopen = 0;
-			lseek(mem, 0, SEEK_SET);
 			break;
 		}
 	}
-
+	
+	lseek(mem, 0, SEEK_SET);
 	close(table);
 	close(mem);
 	if (isopen == -1) {
 		entry.fd = isopen;
 	}
-	printf("found entry-> fd:%d, fp:%d, op:%d", entry.fd, entry.fp, entry.op);
+	printf("found entry-> fd:%d, fp:%d, op:%d\n", entry.fd, entry.fp, entry.op);
 	return entry;
 }
 
