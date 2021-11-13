@@ -306,6 +306,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 
 		// update the file table and save the new fp
 		update_table(entry);
+	}
 
 
 	return &result;
