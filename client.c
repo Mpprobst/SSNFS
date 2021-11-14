@@ -86,7 +86,7 @@ void Close(int fd){
 }
 
 void List(){
-	printf("client requesting file list");
+	printf("client requesting file list\n");
 	list_output  *result_4;
 	list_input  list_files_1_arg;
 	strcpy(list_files_1_arg.user_name, getpwuid(getuid())->pw_name);
@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
 	char *buffer = (char*)malloc(bytes_to_read);
 	Read(fd1, buffer, bytes_to_read);
 	printf("Reading fd %d:\n%s", fd1, buffer);
-
+	printf("ballz\n");
 	List();
 
 exit (0);

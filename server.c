@@ -314,6 +314,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		strcpy(result.out_msg.out_msg_val, message);
 		printf("created message: %s\n", result.out_msg.out_msg_val);
 		printf("user %s wrote %d bytes to file: %s\n", file.user, num_bytes_to_write, file.name);
+		close(mem);
 		// update the file table and save the new fp
 		update_table(entry);
 	}
@@ -352,6 +353,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			memcpy(files, new_files, n_files*11);
 		}
 	}
+	close(mem);
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
 	result.out_msg.out_msg_val = malloc(n_files*11);
