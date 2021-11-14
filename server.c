@@ -333,15 +333,15 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	struct file_info info;
 	int n_files = 0;
 	char files [11]; // max =
-	lseek(table, 0, SEEK_SET);
+	lseek(mem, 0, SEEK_SET);
 	// check if the file is open in the file table
 	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
-		if (strcmp(file.user, username)==0) {
+		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
 			n_files += 1;
 			char new_files[n_files*11];
 			memcpy(new_files, files, (n_files-1)*11);
-			strcat(new_files, file.name);
+			strcat(new_files, info.name);
 			strcat(new_files, '\n');
 			free(files);
 			files = malloc(n_files);
