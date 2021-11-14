@@ -88,10 +88,12 @@ void Close(int fd){
 void List(){
 	list_output  *result_4;
 	list_input  list_files_1_arg;
+	strcpy(list_files_1_arg.user_name, getpwuid(getuid())->pw_name);
 	result_4 = list_files_1(&list_files_1_arg, clnt);
 	if (result_4 == (list_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+	printf("files owned by: %s\n%s", list_files_1_arg.user_name, result_4->out_msg.out_msg.val);
 }
 
 void Delete(char * file_name){
@@ -127,6 +129,8 @@ int main (int argc, char *argv[])
 	char *buffer = (char*)malloc(bytes_to_read);
 	Read(fd1, buffer, bytes_to_read);
 	printf("Reading fd %d:\n%s", fd1, buffer);
+
+	List();
 
 exit (0);
 }
