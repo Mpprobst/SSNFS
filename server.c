@@ -327,6 +327,7 @@ lists all the files in the user's directory
 */
 list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
+	printf("server: listing files from %s", argp->user_name);
 	static list_output result;
 	// append file names to the result
 	int mem = open(vm_filename, O_RDONLY);
@@ -338,6 +339,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
+			printf("n_files: %d, file list:\n%s", n_files, files);
 			n_files += 1;
 			char new_files[n_files*11];
 			memcpy(new_files, files, (n_files-1)*11);
