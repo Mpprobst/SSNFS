@@ -93,7 +93,7 @@ void List(){
 	if (result_4 == (list_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	printf("files owned by: %s\n%s", list_files_1_arg.user_name, result_4->out_msg.out_msg.val);
+	printf("files owned by: %s\n%s", list_files_1_arg.user_name, result_4->out_msg.out_msg_val);
 }
 
 void Delete(char * file_name){
