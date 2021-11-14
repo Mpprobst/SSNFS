@@ -330,7 +330,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
 	// TODO: not reaching this line
-	printf("server: listing files");
+	printf("server: listing files\n");
 	static list_output result;
 	// append file names to the result
 	int mem = open(vm_filename, O_RDONLY);
@@ -347,8 +347,8 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			printf("n_files: %d, file list:\n%s", n_files, files);
 			n_files += 1;
 			//files = (char*)realloc(files, n_files*11);
-			strcat(files, info.name);
-			strcat(files, '\n');
+			//strcat(files, info.name);
+			//strcat(files, '\n');
 		}
 	}
 	close(mem);
