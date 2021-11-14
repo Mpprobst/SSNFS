@@ -336,7 +336,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	char files[1000];
+	char * files;
 	//char * files;// (char *)malloc(11); // 10 for filename, 1 for newline
 	//files = (char*)malloc(11);
 	lseek(mem, 0, SEEK_SET);
@@ -344,18 +344,22 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
-			printf("n_files: %d, file list:\n%s", n_files, files);
+			//printf("n_files: %d, file list:\n%s", n_files, files);
 			n_files += 1;
+			printf("%d: %s\n", n_files, info.name);
 			//files = (char*)realloc(files, n_files*11);
 			//strcat(files, info.name);
 			//strcat(files, '\n');
 		}
 	}
 	close(mem);
+	printf("files found\n")
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
-	result.out_msg.out_msg_val = malloc(n_files*11);
+	result.out_msg.out_msg_val = malloc(result.out_msg.out_msg_len);
+	printf("reply allocated\n");
 	strcpy(result.out_msg.out_msg_val, files);
+	printf("reply constructed\n");
 	free(files);
 	return &result;
 }
