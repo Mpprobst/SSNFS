@@ -346,8 +346,8 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			printf("n_files: %d, file list:\n%s", n_files, files);
 			n_files += 1;
 			files = (char*)realloc(files, n_files*11);
-			strcat(new_files, info.name);
-			strcat(new_files, '\n');
+			strcat(files, info.name);
+			strcat(files, '\n');
 		}
 	}
 	close(mem);
