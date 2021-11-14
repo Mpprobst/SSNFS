@@ -327,6 +327,7 @@ lists all the files in the user's directory
 */
 list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
+	init_disk();
 	// TODO: not reaching this line
 	printf("server: listing files");
 	static list_output result;

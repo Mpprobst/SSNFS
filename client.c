@@ -86,6 +86,7 @@ void Close(int fd){
 }
 
 void List(){
+	printf("client requesting file list");
 	list_output  *result_4;
 	list_input  list_files_1_arg;
 	strcpy(list_files_1_arg.user_name, getpwuid(getuid())->pw_name);
