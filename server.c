@@ -353,7 +353,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 		}
 	}
 	close(mem);
-	printf("files found\n")
+	printf("files found\n");
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
 	result.out_msg.out_msg_val = malloc(result.out_msg.out_msg_len);
