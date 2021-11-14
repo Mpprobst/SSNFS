@@ -336,8 +336,9 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	char * files;// (char *)malloc(11); // 10 for filename, 1 for newline
-	files = (char*)malloc(11);
+	char files[1000];
+	//char * files;// (char *)malloc(11); // 10 for filename, 1 for newline
+	//files = (char*)malloc(11);
 	lseek(mem, 0, SEEK_SET);
 	// check if the file is open in the file table
 	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
@@ -345,7 +346,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			// append filename
 			printf("n_files: %d, file list:\n%s", n_files, files);
 			n_files += 1;
-			files = (char*)realloc(files, n_files*11);
+			//files = (char*)realloc(files, n_files*11);
 			strcat(files, info.name);
 			strcat(files, '\n');
 		}
