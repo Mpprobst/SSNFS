@@ -332,7 +332,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	char files [11]; // max =
+	char files [11]; // 10 for filename, 1 for newline
 	lseek(mem, 0, SEEK_SET);
 	// check if the file is open in the file table
 	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
@@ -344,11 +344,11 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			strcat(new_files, info.name);
 			strcat(new_files, '\n');
 			free(files);
-			files = malloc(n_files);
+			files = (char *)malloc(n_files);
 			memcpy(files, new_files, n_files*11);
 		}
 	}
-
+	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
 	result.out_msg.out_msg_val = malloc(n_files*11);
 	strcpy(result.out_msg.out_msg_val, files);
