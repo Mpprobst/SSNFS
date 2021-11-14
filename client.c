@@ -121,13 +121,12 @@ int main (int argc, char *argv[])
 	Write(fd1, "this is my file.\n it only prints half.\n", 18);
 
 	int fd2 = Open("secret");
-	printf("File descriptor returnd inside main() is:%d\n",  fd2);
+	printf("File descriptor returnd inszide main() is:%d\n",  fd2);
 
 	int bytes_to_read = 20;
 	char *buffer = (char*)malloc(bytes_to_read);
 	Read(fd1, buffer, bytes_to_read);
 	printf("Reading fd %d:\n%s", fd1, buffer);
-
 
 exit (0);
 }

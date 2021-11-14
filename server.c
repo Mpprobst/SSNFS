@@ -322,12 +322,36 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 	return &result;
 }
 
+/*
+lists all the files in the user's directory
+*/
 list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
-	static list_output  result;
+	static list_output result;
+	// append file names to the result
+	int mem = open(vm_filename, O_RDONLY);
+	struct file_info info;
+	int n_files = 0;
+	char files [11]; // max =
+	lseek(table, 0, SEEK_SET);
+	// check if the file is open in the file table
+	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
+		if (strcmp(file.user, username)==0) {
+			// append filename
+			n_files += 1;
+			char new_files[n_files*11];
+			memcpy(new_files, files, (n_files-1)*11);
+			strcat(new_files, file.name);
+			strcat(new_files, '\n');
+			free(files);
+			files = malloc(n_files);
+			memcpy(files, new_files, n_files*11);
+		}
+	}
 
-
-
+	result.out_msg.out_msg_len = n_files*11;
+	result.out_msg.out_msg_val = malloc(n_files*11);
+	strcpy(result.out_msg.out_msg_val, files);
 	return &result;
 }
 
