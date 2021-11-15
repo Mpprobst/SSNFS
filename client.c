@@ -126,6 +126,8 @@ int main (int argc, char *argv[])
 	int fd2 = Open("secret");
 	printf("File descriptor returnd inszide main() is:%d\n",  fd2);
 
+	List();
+
 	int bytes_to_read = 20;
 	char *buffer = (char*)malloc(bytes_to_read);
 	Read(fd1, buffer, bytes_to_read);

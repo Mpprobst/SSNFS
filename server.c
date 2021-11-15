@@ -354,11 +354,11 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	printf("files found\n");
 	//free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
-	result.out_msg.out_msg_val = malloc(result.out_msg.out_msg_len);
+	//result.out_msg.out_msg_val = malloc(result.out_msg.out_msg_len);
 	printf("reply allocated\n");
 	strcpy(result.out_msg.out_msg_val, files);
 	printf("reply constructed\n");
-	free(files);
+	//free(files);
 	return &result;
 }
 
