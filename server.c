@@ -336,14 +336,14 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	char * files = malloc(11); // 10 for filename, 1 for newline
+	char * files = malloc(12); // 10 for filename, 1 for newline
 	int range = lseek(mem, 0, SEEK_END) / (FILE_SIZE*BLOCK_SIZE);
 	printf("there are %d files in memory of size: %d\n", range, range*FILE_SIZE*BLOCK_SIZE);
 
 	// check if the file is open in the file table
 	for (int i = 0; i < range; i++) {
 		lseek(mem, i*FILE_SIZE*BLOCK_SIZE, SEEK_SET);
-		printf("idx: %d", i*FILE_SIZE*BLOCK_SIZE);
+		printf("idx: %d\n", i*FILE_SIZE*BLOCK_SIZE);
 		read(mem, &info, 20);
 		printf("%s/%s\n", info.user, info.name);
 		if (strcmp(info.user, argp->user_name)==0) {
