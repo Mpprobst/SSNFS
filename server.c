@@ -338,11 +338,12 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int n_files = 0;
 	char * files = malloc(11); // 10 for filename, 1 for newline
 	int range = lseek(mem, 0, SEEK_END) / (FILE_SIZE*BLOCK_SIZE);
-	printf("there are %d files in memory\n", range);
+	printf("there are %d files in memory of size: %d\n", range, range*FILE_SIZE*BLOCK_SIZE);
 
 	// check if the file is open in the file table
 	for (int i = 0; i < range; i++) {
 		lseek(mem, i*FILE_SIZE*BLOCK_SIZE, SEEK_SET);
+		printf("idx: %d", i*FILE_SIZE*BLOCK_SIZE);
 		read(mem, &info, 20);
 		printf("%s/%s\n", info.user, info.name);
 		if (strcmp(info.user, argp->user_name)==0) {
@@ -350,7 +351,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			//printf("n_files: %d, file list:\n%s", n_files, files);
 			n_files += 1;
 			printf("%d: %s\n", n_files, info.name);
-			files = (char*)realloc(files, n_files*11);
+			files = realloc(files, n_files*11);
 			strcat(files, info.name);
 			strcat(files, '\n');
 		}
