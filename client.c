@@ -38,7 +38,7 @@ int Open(char *filename_to_open){
 	if (result_1 == (open_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	free(result_1.out_msg.out_msg_val);
+	free(result_1->out_msg.out_msg_val);
 	printf ("In client: Directory name is:%s \nIn client: Name of the file opened is:%s \nIn client: file descriptor returned is:%d\n", open_file_1_arg.user_name, result_1->out_msg.out_msg_val,  result_1->fd);
 	return result_1->fd;
 }
@@ -60,7 +60,7 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 	buffer = (char *)malloc(result_3->out_msg.out_msg_len);
 	strcpy(buffer, result_3->out_msg.out_msg_val);
 	printf("%s\n", result_3->out_msg.out_msg_val);
-	free(result_3.out_msg.out_msg_val);
+	free(result_3->out_msg.out_msg_val);
 
 }
 
@@ -77,7 +77,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 		clnt_perror (clnt, "call failed");
 	}
 	memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
-	free(result_2.out_msg.out_msg_val);
+	free(result_2->out_msg.out_msg_val);
 }
 
 void Close(int fd){
@@ -99,7 +99,7 @@ void List(){
 		clnt_perror (clnt, "call failed");
 	}
 	printf("files owned by: %s\n%s", list_files_1_arg.user_name, result_4->out_msg.out_msg_val);
-	free(result_4.out_msg.out_msg_val);
+	free(result_4->out_msg.out_msg_val);
 }
 
 void Delete(char * file_name){
