@@ -337,9 +337,11 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	struct file_info info;
 	int n_files = 0;
 	char * files = malloc(11); // 10 for filename, 1 for newline
-	lseek(mem, 0, SEEK_SET);
+	//lseek(mem, 0, SEEK_SET);
+	printf("sizeof memory: ")
 	// check if the file is open in the file table
 	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
+		printf("%s/%s\n", info.user, info.name);
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
 			//printf("n_files: %d, file list:\n%s", n_files, files);
@@ -354,7 +356,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	printf("files found\n");
 	//free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
-	//result.out_msg.out_msg_val = malloc(result.out_msg.out_msg_len);
+	result.out_msg.out_msg_val = malloc(n_files*11);
 	printf("reply allocated\n");
 	strcpy(result.out_msg.out_msg_val, files);
 	printf("reply constructed\n");
