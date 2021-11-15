@@ -338,7 +338,6 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int n_files = 0;
 	char * files = malloc(11); // 10 for filename, 1 for newline
 	//lseek(mem, 0, SEEK_SET);
-	printf("sizeof memory: ")
 	// check if the file is open in the file table
 	for (; read(mem, &info, (FILE_SIZE*BLOCK_SIZE)) > 0;) {
 		printf("%s/%s\n", info.user, info.name);
