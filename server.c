@@ -352,16 +352,16 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			// append filename
 			//printf("n_files: %d, file list:\n%s", n_files, files);
 			n_files += 1;
-			printf("%d: %s\n", n_files, info.name);
-			//files = realloc(files, n_files*11);
-			//strcat(files, info.name);
-			//strcat(files, '\n');
+			files = realloc(files, n_files*12);
+			strcat(files, info.name);
+			strcat(files, '\n');
+			printf("%d: %s\n", n_files, files);
 		}
 	}
 	close(mem);
 	printf("files found\n");
-	result.out_msg.out_msg_len = n_files*11;
-	result.out_msg.out_msg_val = malloc(n_files*11);
+	result.out_msg.out_msg_len = n_files*12;
+	result.out_msg.out_msg_val = malloc(n_files*12);
 	printf("reply allocated\n");
 	strcpy(result.out_msg.out_msg_val, files);
 	printf("reply constructed\n");
