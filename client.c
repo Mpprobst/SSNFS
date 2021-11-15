@@ -61,7 +61,6 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 	strcpy(buffer, result_3->out_msg.out_msg_val);
 	printf("%s\n", result_3->out_msg.out_msg_val);
 	free(result_3->out_msg.out_msg_val);
-
 }
 
 void Read(int fd, char * buffer, int num_bytes_to_read){
