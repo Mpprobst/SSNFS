@@ -353,12 +353,13 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			//printf("n_files: %d, file list:\n%s", n_files, files);
 			char temp[n_files*12];
 			memcpy(temp, files, n_files*12);
+			printf("copied: %s\n", temp);
 			n_files += 1;
 			free(files);
 			files = malloc(n_files*12);
 			strcpy(files, temp);
-			strcat(files, info.name);
-			strcat(files, '\n');
+			//strcat(files, info.name);
+			//strcat(files, '\n');
 			printf("%d: %s\n", n_files, files);
 		}
 	}
