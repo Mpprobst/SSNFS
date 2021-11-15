@@ -332,6 +332,8 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	// TODO: not reaching this line
 	printf("server: listing files\n");
 	static list_output result;
+	free(result.out_msg.out_msg_val);
+
 	// append file names to the result
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
@@ -358,7 +360,6 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	}
 	close(mem);
 	printf("files found\n");
-	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
 	result.out_msg.out_msg_val = malloc(n_files*11);
 	printf("reply allocated\n");
