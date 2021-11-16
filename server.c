@@ -192,6 +192,9 @@ File can only be 64 blocks long and is allocated on creation
 */
 open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	init_disk();
+	static open_output result;
+	free(result.out_msg.out_msg_val);
+
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
 
@@ -216,10 +219,8 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		close(table);
 	}
 
-	static open_output result;
 	result.fd=entry.fd;
 	result.out_msg.out_msg_len=10;
-	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_val=(char *)malloc(result.out_msg.out_msg_len);
   strcpy(result.out_msg.out_msg_val, argp->file_name);
 
@@ -228,10 +229,8 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 
 read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	init_disk();
-
 	// check if file is open. if not then do nothing and send err msg
-	static read_output  result;
-
+	static read_output result;
 	free(result.out_msg.out_msg_val);
 	printf("user: %s requesting to read %d bytes from fd: %d\n", argp->user_name, argp->numbytes, argp->fd);
 
@@ -248,7 +247,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		// get file
 		struct file_info file = get_open_file(entry.fd);
 		printf("file: %s exists.\n", file.name);
-		// don't read past file size
+		// don't read past file size TODO send error instead
 		int available_space = (FILE_SIZE*BLOCK_SIZE) - 20;	// can use full filesize because entry.fp initialized to 20
 		if (available_space < num_bytes_to_read) {
 			num_bytes_to_read = available_space;
@@ -277,7 +276,6 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
-
 	static write_output  result;
 	free(result.out_msg.out_msg_val);
 	printf("user: %s requesting to write to file with descriptor: %d\n", argp->user_name, argp->fd);
@@ -313,6 +311,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		result.out_msg.out_msg_len=sizeof(message);
 		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, message);
+		free(message);
 		printf("created message: %s\n", result.out_msg.out_msg_val);
 		printf("user %s wrote %d bytes to file: %s\n", file.user, num_bytes_to_write, file.name);
 		close(mem);
@@ -329,7 +328,6 @@ lists all the files in the user's directory
 list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
-	// TODO: not reaching this line
 	printf("\nServer: listing files.\n");
 	static list_output result;
 	free(result.out_msg.out_msg_val);
@@ -338,7 +336,6 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_val = malloc(0);
 	//char * files=malloc(0); // 10 for filename, 1 for newline
 	int range = lseek(mem, 0, SEEK_END) / (FILE_SIZE*BLOCK_SIZE);
@@ -366,13 +363,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	}
 	close(mem);
 	printf("%d files owned by %s:\n%s", n_files, argp->user_name, result.out_msg.out_msg_val);
-	//free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
-	//result.out_msg.out_msg_val = (char *)malloc(n_files*11);
-	//printf("reply allocated\n");
-	//strcpy(result.out_msg.out_msg_val, files);
-	//printf("reply constructed\n");
-	//free(files);
 	return &result;
 }
 
