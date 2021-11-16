@@ -352,7 +352,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
 			//printf("n_files: %d, file list:\n%s", n_files, files);
-			char * temp = malloc(n_files*12);
+			char temp[n_files*12];
 			memset(temp, ' ', n_files*12);
 			memcpy(temp, files, n_files*12);
 			printf("copied: %s\n", temp);
