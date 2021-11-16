@@ -123,10 +123,10 @@ int main (int argc, char *argv[])
 	//char message[50] = "this is my file.\n it only prints half.\n";
 	Write(fd1, "this is my file.\n it only prints half.\n", 18);
 
-	int fd2 = Open("secret");
-	printf("File descriptor returnd inside main() is:%d\n",  fd2);
+	//int fd2 = Open("secret");
+	//printf("File descriptor returnd inside main() is:%d\n",  fd2);
 
-	List();
+	//List();
 
 	int bytes_to_read = 20;
 	char *buffer = (char*)malloc(bytes_to_read);
