@@ -260,10 +260,9 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		memcpy(buffer, &file.data, num_bytes_to_read-1);
 		//entry.fp+=num_bytes_to_read;
 		entry.op = 1;
-		printf("buffer populated: %s", buffer);
 		result.out_msg.out_msg_len=num_bytes_to_read;
-		result.out_msg.out_msg_val=(char *) malloc(num_bytes_to_read);
-		memcpy(result.out_msg.out_msg_val, buffer, num_bytes_to_read);
+		result.out_msg.out_msg_val=malloc(num_bytes_to_read);
+		strcpy(result.out_msg.out_msg_val, buffer);
 		printf("read file: %s from user %s\n", file.name, file.user);
 
 		// update the file table and save the new fp
