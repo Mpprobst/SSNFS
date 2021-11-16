@@ -330,7 +330,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
 	// TODO: not reaching this line
-	printf("server: listing files\n");
+	printf("\nServer: listing files.\n");
 	static list_output result;
 	free(result.out_msg.out_msg_val);
 
@@ -338,8 +338,9 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	char * files=malloc(0); // 10 for filename, 1 for newline
-	//memset(files, ' ', 11);
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_mst_val = malloc(0);
+	//char * files=malloc(0); // 10 for filename, 1 for newline
 	int range = lseek(mem, 0, SEEK_END) / (FILE_SIZE*BLOCK_SIZE);
 	printf("there are %d files in memory of size: %d\n", range, range*FILE_SIZE*BLOCK_SIZE);
 
@@ -351,27 +352,27 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			// append filename
 			char temp[n_files*11];
 			memset(temp, ' ', n_files*11);
-			strcpy(temp, files);
+			strcpy(temp, result.out_msg.out_msg_val);
 
 			// resize files array
 			n_files += 1;
-			free(files);
-			files = malloc(n_files*11);
-			memset(files, ' ', n_files*11);
-			strcpy(files, temp);
-			strcat(files, info.name);
-			strcat(files, "\n");
+			free(result.out_msg.out_msg_val);
+			result.out_msg.out_msg_val = malloc(n_files*11);
+			memset(result.out_msg.out_msg_val, ' ', n_files*11);
+			strcpy(result.out_msg.out_msg_val, temp);
+			strcat(result.out_msg.out_msg_val, info.name);
+			strcat(result.out_msg.out_msg_val, "\n");
 		}
 	}
 	close(mem);
-	printf("%d files owned by %s:\n%s", n_files, argp->user_name, files);
-	free(result.out_msg.out_msg_val);
+	printf("%d files owned by %s:\n%s", n_files, argp->user_name, result.out_msg.out_msg_val);
+	//free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
-	result.out_msg.out_msg_val = (char *)malloc(n_files*11);
-	printf("reply allocated\n");
-	strcpy(result.out_msg.out_msg_val, files);
-	printf("reply constructed\n");
-	free(files);
+	//result.out_msg.out_msg_val = (char *)malloc(n_files*11);
+	//printf("reply allocated\n");
+	//strcpy(result.out_msg.out_msg_val, files);
+	//printf("reply constructed\n");
+	//free(files);
 	return &result;
 }
 
