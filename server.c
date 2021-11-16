@@ -364,6 +364,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			//memcpy(&files+(n_files-1)*12, info.name, sizeof(info.name));
 			files[n_files*12-1] = '\n';
 			printf("%d: %s\n", n_files, files);
+			free(temp);
 		}
 	}
 	close(mem);
