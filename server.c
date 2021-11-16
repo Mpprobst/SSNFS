@@ -220,8 +220,8 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	result.fd=entry.fd;
 	result.out_msg.out_msg_len=10;
 	free(result.out_msg.out_msg_val);
-	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-  strcpy(result.out_msg.out_msg_val, (*argp).file_name);
+	result.out_msg.out_msg_val=(char *)malloc(result.out_msg.out_msg_len);
+  strcpy(result.out_msg.out_msg_val, argp->file_name);
 
 	return &result;
 }
@@ -354,7 +354,8 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			//printf("n_files: %d, file list:\n%s", n_files, files);
 			char temp[n_files*11];
 			memset(temp, ' ', n_files*11);
-			memcpy(temp, files, n_files*11);
+			strcpy(temp, files);
+			//memcpy(temp, files, n_files*11);
 			printf("copied %dB: %s \n", sizeof(temp), temp);
 
 			// resize files array
@@ -363,13 +364,14 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			files = malloc(n_files*11);
 			memset(files, ' ', n_files*11);
 			//printf("files in larger array (%dB)\n", sizeof(*files));
-			//strcpy(files, temp);
-			memcpy(files, temp, (n_files-1)*11);
+			strcpy(files, temp);
+			//memcpy(files, temp, (n_files-1)*11);
 			strcat(files, info.name);
+			strcat(files, "\n");
 			//memcpy(&files+(n_files-1)*11, info.name, sizeof(info.name));
 			//memcpy(&files+(n_files-1)*12, info.name, sizeof(info.name));
-			files[n_files*11-1] = '\n';
-			printf("%d (%dB): %s\n", n_files, sizeof(*files), files);
+			//files[n_files*11-1] = '\n';
+			printf("%d (%dB): %s\n", n_files, sizeof(files), files);
 			//free(temp);
 		}
 	}
