@@ -361,7 +361,6 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			strcpy(files, temp);
 			strcat(files, info.name);
 			strcat(files, "\n");
-			free(temp);
 		}
 	}
 	close(mem);
