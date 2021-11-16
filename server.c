@@ -262,7 +262,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		//entry.fp+=num_bytes_to_read;
 		entry.op = 1;
 		result.out_msg.out_msg_len=num_bytes_to_read;
-		result.out_msg.out_msg_val=malloc(num_bytes_to_read);
+		result.out_msg.out_msg_val=(char*)malloc(result.out_msg.out_msg_len);
 		strcpy(result.out_msg.out_msg_val, buffer);
 		printf("read file: %s from user %s\n", file.name, file.user);
 
