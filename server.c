@@ -338,8 +338,8 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	char * files; // 10 for filename, 1 for newline
-	memset(files, ' ', 11);
+	char * files=malloc(0); // 10 for filename, 1 for newline
+	//memset(files, ' ', 11);
 	int range = lseek(mem, 0, SEEK_END) / (FILE_SIZE*BLOCK_SIZE);
 	printf("there are %d files in memory of size: %d\n", range, range*FILE_SIZE*BLOCK_SIZE);
 
