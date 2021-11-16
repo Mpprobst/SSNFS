@@ -338,7 +338,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int mem = open(vm_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
-	char * files = malloc(11); // 10 for filename, 1 for newline
+	char * files; // 10 for filename, 1 for newline
 	memset(files, ' ', 11);
 	int range = lseek(mem, 0, SEEK_END) / (FILE_SIZE*BLOCK_SIZE);
 	printf("there are %d files in memory of size: %d\n", range, range*FILE_SIZE*BLOCK_SIZE);
@@ -352,11 +352,16 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
 			//printf("n_files: %d, file list:\n%s", n_files, files);
+
 			char temp[n_files*11];
 			memset(temp, ' ', n_files*11);
-			strcpy(temp, files);
-			//memcpy(temp, files, n_files*11);
-			printf("copied %dB: %s \n", sizeof(temp), temp);
+			// dont copy temp if it is size 0
+			//if (i > 0)
+			//{
+				strcpy(temp, files);
+				//memcpy(temp, files, n_files*11);
+				printf("copied %dB: %s \n", sizeof(temp), temp);
+			//}
 
 			// resize files array
 			n_files += 1;
