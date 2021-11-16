@@ -351,39 +351,26 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 		printf("%s/%s\n", info.user, info.name);
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
-			//printf("n_files: %d, file list:\n%s", n_files, files);
-
 			char temp[n_files*11];
 			memset(temp, ' ', n_files*11);
-			// dont copy temp if it is size 0
-			//if (i > 0)
-			//{
-				strcpy(temp, files);
-				//memcpy(temp, files, n_files*11);
-				printf("copied %dB: %s \n", sizeof(temp), temp);
-			//}
+			strcpy(temp, files);
 
 			// resize files array
 			n_files += 1;
 			free(files);
 			files = malloc(n_files*11);
 			memset(files, ' ', n_files*11);
-			//printf("files in larger array (%dB)\n", sizeof(*files));
 			strcpy(files, temp);
-			//memcpy(files, temp, (n_files-1)*11);
 			strcat(files, info.name);
 			strcat(files, "\n");
-			//memcpy(&files+(n_files-1)*11, info.name, sizeof(info.name));
-			//memcpy(&files+(n_files-1)*12, info.name, sizeof(info.name));
-			//files[n_files*11-1] = '\n';
-			printf("%d (%dB): %s\n", n_files, sizeof(files), files);
 			//free(temp);
 		}
 	}
 	close(mem);
-	printf("files found\n");
-	result.out_msg.out_msg_len = n_files*12;
-	result.out_msg.out_msg_val = malloc(n_files*12);
+	printf("files found\n%s", files);
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_msg_len = n_files*11;
+	//result.out_msg.out_msg_val = malloc(n_files*11);
 	printf("reply allocated\n");
 	strcpy(result.out_msg.out_msg_val, files);
 	printf("reply constructed\n");
