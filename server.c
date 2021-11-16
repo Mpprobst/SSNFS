@@ -346,9 +346,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	// check if the file is open in the file table
 	for (int i = 0; i < range; i++) {
 		lseek(mem, i*FILE_SIZE*BLOCK_SIZE, SEEK_SET);
-		printf("idx: %d\n", i*FILE_SIZE*BLOCK_SIZE);
 		read(mem, &info, 20);
-		printf("%s/%s\n", info.user, info.name);
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
 			char temp[n_files*11];
@@ -367,10 +365,10 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 		}
 	}
 	close(mem);
-	printf("files found\n%s", files);
+	printf("%d files owned by %s:\n%s", n_files, files, argp->user_name);
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
-	//result.out_msg.out_msg_val = malloc(n_files*11);
+	result.out_msg.out_msg_val = (char *)malloc(n_files*11);
 	printf("reply allocated\n");
 	strcpy(result.out_msg.out_msg_val, files);
 	printf("reply constructed\n");
