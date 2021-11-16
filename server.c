@@ -362,6 +362,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			free(files);
 			files = malloc(n_files*11);
 			memset(files, ' ', n_files*11);
+			//printf("files in larger array (%dB)\n", sizeof(*files));
 			//strcpy(files, temp);
 			memcpy(files, temp, sizeof(*temp));
 			strcat(files, info.name);
