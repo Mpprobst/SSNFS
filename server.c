@@ -43,6 +43,7 @@ struct table_entry {
 struct file_info {
   char user[10];
 	char name[10];
+	// TODO add int for space used. This tells us how far in the user may read
 	char data[FILE_SIZE*BLOCK_SIZE-20];
 };
 
@@ -257,7 +258,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		}
 
 		char buffer[num_bytes_to_read];
-		memcpy(buffer, &file.data, num_bytes_to_read-1);
+		memcpy(buffer, &file.data, num_bytes_to_read);
 		//entry.fp+=num_bytes_to_read;
 		entry.op = 1;
 		result.out_msg.out_msg_len=num_bytes_to_read;
