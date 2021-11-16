@@ -359,7 +359,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 
 			// resize files array
 			n_files += 1;
-			//free(files);
+			free(files);
 			files = malloc(n_files*11);
 			memset(files, ' ', n_files*11);
 			memcpy(files, temp, sizeof(temp));
