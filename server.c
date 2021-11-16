@@ -371,7 +371,8 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 {
 	static delete_output  result;
-
+	// if file is open, close it
+	// get the idx then replace it with a new file info (no specified user or name)
 
 
 	return &result;
@@ -381,7 +382,8 @@ close_output * close_file_1_svc(close_input *argp, struct svc_req *rqstp)
 {
 	static close_output  result;
 
-
+	// check if file is open
+	// if so, remove it from the file table.
 
 	return &result;
 }

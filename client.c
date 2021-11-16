@@ -120,25 +120,24 @@ int main (int argc, char *argv[])
 	ssnfsprog_1 (host);
 
 	int fd1 = Open("myfile");
-	printf("File descriptor returnd inside main() is:%d\n",  fd1);
+	printf("File descriptor returned inside main() is:%d\n",  fd1);
 
-	//char message[50] = "this is my file.\n it only prints half.\n";
 	Write(fd1, "hi this is my file. it only prints half.\n", 20);
 
 	int fd2 = Open("secret");
-	int fd3 = Open("boner");
-	int fd4 = Open("balls");
-	int fd5 = Open("soccer");
-	//printf("File descriptor returnd inside main() is:%d\n",  fd2);
+	printf("File descriptor returned inside main() is:%d\n",  fd2);
 
-	//List();
+	int fd3 = Open("thirdfile");
+	int fd4 = Open("michael");
+
+	//List();	// uncommenting this makes Read the 4th command and causes memory issue
 
 	int bytes_to_read = 20;
-	char *buffer = (char*)malloc(bytes_to_read);
+	char buffer[bytes_to_read];
 	Read(fd1, buffer, bytes_to_read);
 	printf("Reading fd %d:\n%s", fd1, buffer);
 
-	//List();
+	List();
 
 exit (0);
 }
