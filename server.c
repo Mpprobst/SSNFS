@@ -355,14 +355,15 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			char temp[n_files*11];
 			memset(temp, ' ', n_files*11);
 			memcpy(temp, files, n_files*11);
-			printf("copied %d bytes: %s \n", sizeof(temp), temp);
+			printf("copied %dB: %s \n", sizeof(temp), temp);
 
 			// resize files array
 			n_files += 1;
 			free(files);
 			files = malloc(n_files*11);
 			memset(files, ' ', n_files*11);
-			memcpy(files, temp, sizeof(temp));
+			strcpy(files, temp);
+			//memcpy(files, temp, sizeof(temp));
 			printf("files copied to larger array: %s (%dB)\n", files, sizeof(files));
 			strcat(files, info.name);
 			//memcpy(&files+(n_files-1)*11, info.name, sizeof(info.name));
