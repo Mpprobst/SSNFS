@@ -352,21 +352,21 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 		if (strcmp(info.user, argp->user_name)==0) {
 			// append filename
 			//printf("n_files: %d, file list:\n%s", n_files, files);
-			char temp[n_files*12];
-			memset(temp, ' ', n_files*12);
-			memcpy(temp, files, n_files*12);
+			char temp[n_files*11];
+			memset(temp, ' ', n_files*11);
+			memcpy(temp, files, n_files*11);
 			printf("copied %d bytes: %s \n", sizeof(temp), temp);
 
 			// resize files array
 			n_files += 1;
 			free(files);
-			files = malloc(n_files*12);
-			memset(files, ' ', n_files*12);
-			memcpy(files, temp, (n_files-1)*12);
-			printf("copying %d bytes of new file\n", sizeof(info.name));
-			memcpy(&files+(n_files-1)*12, info.name, sizeof(info.name));
+			files = malloc(n_files*11);
+			memset(files, ' ', n_files*11);
+			memcpy(files, temp, (n_files-1)*11);
+			strcpy(files, info.name);
+			//memcpy(&files+(n_files-1)*11, info.name, sizeof(info.name));
 			//memcpy(&files+(n_files-1)*12, info.name, sizeof(info.name));
-			files[n_files*12-1] = '\n';
+			files[n_files*11-1] = '\n';
 			printf("%d: %s\n", n_files, files);
 			//free(temp);
 		}
