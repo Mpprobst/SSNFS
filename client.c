@@ -47,8 +47,10 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 	write_output *result_3;
 	write_input write_file_1_arg;
 	write_file_1_arg.fd = fd;
+	write_file_1_arg.buffer.buffer_val = malloc(num_bytes_to_write);
 	strcpy(write_file_1_arg.user_name, getpwuid(getuid())->pw_name);
-	strcpy(write_file_1_arg.buffer.buffer_val, buffer);
+	memcpy(write_file_1_arg.buffer.buffer_val, buffer, num_bytes_to_write);
+	//strcpy(write_file_1_arg.buffer.buffer_val, buffer);
 	write_file_1_arg.buffer.buffer_len = num_bytes_to_write;
 	result_3 = write_file_1(&write_file_1_arg, clnt);
 		if (result_3 == (write_output *) NULL) {
@@ -121,7 +123,7 @@ int main (int argc, char *argv[])
 	printf("File descriptor returnd inside main() is:%d\n",  fd1);
 
 	//char message[50] = "this is my file.\n it only prints half.\n";
-	Write(fd1, "this is my file.\n it only prints half.\n", 18);
+	Write(fd1, "hi this is my file. it only prints half.\n", 20);
 
 	int fd2 = Open("secret");
 	int fd3 = Open("boner");
