@@ -358,7 +358,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			free(files);
 			files = malloc(n_files*12);
 			strcpy(files, temp);
-			//strcat(files, info.name);
+			strcat(files, info.name);
 			//strcat(files, '\n');
 			printf("%d: %s\n", n_files, files);
 		}
