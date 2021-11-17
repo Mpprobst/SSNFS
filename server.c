@@ -349,10 +349,10 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 					free_block = get_free_block();
 				}
 
-				fi.blocks[new_block] = new_block;
-				curr_block = new_block;
+				fi.blocks[curr_block] = new_block;
+				//curr_block = new_block;
 			}
-
+			printf("\twriting %d to fi.blocks[%d] = %d", bytes_to_write, curr_block, fi.blocks[curr_block]);
 			// write to blocks 512 bytes at a time
 			lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
 			write(mem, &argp->buffer.buffer_val+bytes_written, bytes_to_write);
