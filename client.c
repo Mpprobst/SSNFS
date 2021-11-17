@@ -145,7 +145,7 @@ int main (int argc, char *argv[])
 	Read(fd1, buffer, bytes_to_read);
 	printf("Reading fd %d:\n%s", fd1, buffer);
 
-	char buffer2[10]
+	char buffer2[10];
 	Read(10, buffer2, 10);
 
 	//List();
