@@ -291,6 +291,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
 	}
 	else {
+		table[argp->fd].fp = 0;
 		// read the file
 		int mem = open(memory_filename, O_RDONLY);
 		int bytes_read = 0;

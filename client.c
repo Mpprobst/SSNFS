@@ -142,7 +142,7 @@ int main (int argc, char *argv[])
 
 	int bytes_to_read = 20;
 	char buffer[bytes_to_read];
-	//Read(fd1, buffer, bytes_to_read);
+	Read(fd1, buffer, bytes_to_read);
 	printf("Reading fd %d:\n%s", fd1, buffer);
 
 	//List();
