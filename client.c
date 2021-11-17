@@ -48,13 +48,16 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
-	printf("\nIn client: writing %s (%dB) to fd:%d\n", buffer, num_bytes_to_write, fd);
+	printf("\nIn client: writing \"%s\" (%dB) to fd:%d\n", buffer, num_bytes_to_write, fd);
 	write_output *result_3;
 	write_input write_file_1_arg;
 	write_file_1_arg.fd = fd;
 	write_file_1_arg.buffer.buffer_val = malloc(num_bytes_to_write);
+	printf("allocate buffer\n");
 	strcpy(write_file_1_arg.user_name, getpwuid(getuid())->pw_name);
+	printf("len buffer = %d, bytes written: %d\n", sizeof(buffer), num_bytes_to_write);
 	memcpy(write_file_1_arg.buffer.buffer_val, buffer, num_bytes_to_write);
+	printf("write to buffer in args\n");
 	//strcpy(write_file_1_arg.buffer.buffer_val, buffer);
 	write_file_1_arg.buffer.buffer_len = num_bytes_to_write;
 	result_3 = write_file_1(&write_file_1_arg, clnt);
