@@ -43,7 +43,7 @@ struct table_entry {
 // give names that do not take up too much space.
 struct file_info {
   char username[USERNAME_LEN];
-	char namename[FILENAME_LEN];
+	char filename[FILENAME_LEN];
 	int blocks[FILE_SIZE];
 	int curr_size;	// how many bytes have been written to the file
 };
@@ -106,13 +106,6 @@ void update_table(struct table_entry changed_entry) {
 }
 
 /*
-given a file descriptor, return metadata for the file
-*/
-struct file_info get_open_file(int fd) {
-	return table[fd];
-}
-
-/*
 check the file table if the file is already open.
 if so, return the index where the file exists
 */
@@ -129,7 +122,7 @@ int is_file_open(char * username, char * filename) {
 searches metadata for a file belonging to a specific user.
 returns: -1 for failure, 1 for success
 */
-int file_exists(char * username, char * filename) {
+struct file_info file_exists(char * username, char * filename) {
 	int exists = -1;
 	int meta = open(metadata_filename, O_RDONLY);
 	struct file_info fi;
@@ -141,11 +134,18 @@ int file_exists(char * username, char * filename) {
 	}
 	close(meta);
 	if (exists == -1) {
-		return NULL;
+		fi.curr_size = -1;
 	}
 	return fi;
 }
 
+/*
+given a file descriptor, return metadata for the file
+*/
+struct file_info get_open_file(int fd) {
+	struct table_entry entry = table[fd];
+	return file_exists(entry.username, entry.filename);
+}
 
 /*
 gets next available block in memory
@@ -185,7 +185,7 @@ int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
 	int size = lseek(mem, 0, SEEK_END);
 
-	printf("memory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE);
+	printf("memory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE));
 	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
 		printf("memory is full!\n");
 		return -1;
@@ -196,7 +196,7 @@ int add_block() {
 	memset(blank, ' ', BLOCK_SIZE);
 	write(mem, blank, BLOCK_SIZE);
 	close(mem);
-	return n_blocks+1;
+	return n_blocks;
 }
 
 /*
@@ -206,7 +206,7 @@ returns: metadata for new file
 struct file_info create_file(char * username, char * filename) {
 	struct file_info fi;
 	int meta = open(metadata_filename, O_RDWR);
-	int size = lseek(mem, 0, SEEK_END);
+	int size = lseek(meta, 0, SEEK_END);
 	int meta_idx = -1;
 	for (; read(meta, &fi, sizeof(fi)) > 0;) {
 		// when file is deleted, curr size is set to -1
@@ -257,11 +257,6 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		strcpy(message, "ERROR: File not opened.\nFile table is full. Please close a file to open a new one.\n");
 	}
 	else {
-		// if table entry is free. if free, username and filename are blank strings
-		strcpy(table[i].username, fi.username);
-		strcpy(table[i].filename, fi.filename);
-		table[i].fp = 0;
-
 		struct file_info fi;
 		// check if file is already open
 		int fd = is_file_open(argp->user_name, argp->file_name);
@@ -270,12 +265,15 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 			sprintf(message, "Opened existing file: %s\n", fi.filename);
 		}
 		// file does not exist, create it
-		if (fi == NULL) {
+		if (fi.curr_size == -1) {
 			fi = create_file(argp->user_name, argp->file_name);
 			sprintf(message, "Created new file: %s", fi.filename);
 		}
-
-		printf("added table entry for %s/%s at block %d.\n", argp->user_name, argp->file_name, entry.fd));
+		// if table entry is free. if free, username and filename are blank strings
+		strcpy(table[fd].username, fi.username);
+		strcpy(table[fd].filename, fi.filename);
+		table[fd].fp = 0;
+		printf("added table entry for %s/%s at fd: %d\n", argp->user_name, argp->file_name, fd);
 	}
 
 	// prepare reply
