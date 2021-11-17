@@ -334,8 +334,8 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		int bytes_written = 0;
 		while (bytes_written < argp->numbytes) {
 			// get correct block from fi based on curr_size
-			int curr_block = fi.curr_size / BLOCK_SIZE;
-			int idx = fi.curr_size % BLOCK_SIZE;			// index into current block
+			int curr_block = table[argp->fd].fp / BLOCK_SIZE;
+			int idx = table[argp->fd].fp % BLOCK_SIZE;			// index into current block
 
 			int bytes_to_write = argp->numbytes - bytes_written;
 			int bytes_in_block = BLOCK_SIZE - idx;
@@ -359,12 +359,13 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				fi.blocks[curr_block] = new_block;
 				//curr_block = new_block;
 			}
-			printf("\twriting %d to fi.blocks[%d] = %d", bytes_to_write, curr_block, fi.blocks[curr_block]);
+			printf("\twriting %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
 			// write to blocks 512 bytes at a time
-			lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
+			int mem_loc = lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
+			printf("wrote to mem loc: %d\n", mem_loc)
 			write(mem, &argp->buffer.buffer_val+bytes_written, bytes_to_write);
 			bytes_written += bytes_to_write;
-			fi.curr_size += bytes_written;
+			table[argp->fd].fp += bytes_written;
 		}
 		close(mem);
 		table[argp->fd].fp += bytes_written;
