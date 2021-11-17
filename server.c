@@ -92,6 +92,7 @@ void init_disk() {	// char * username
 			memset(table[i].filename, ' ', FILENAME_LEN);
 			table[i].fp = -1;
 		}
+		initialized = 1;
 		close(mem);
 		close(meta);
 	}
