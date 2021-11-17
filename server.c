@@ -353,7 +353,15 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		}
 		close(mem);
 		table[argp->fd].fp += bytes_written;
+		sprintf(message, "successfully wrote %d bytes to fd %d", bytes_written, argp->fd);
+
 	}
+
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_msg_len = message_size;
+	result.out_msg.out_msg_val = (char *)malloc(message_size);
+	strcpy(result.out_msg.out_msg_val, message);
+
 	return &result;
 }
 

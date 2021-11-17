@@ -53,22 +53,21 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 	write_input write_file_1_arg;
 	char message[num_bytes_to_write];
 	memcpy(message, buffer, num_bytes_to_write);
-	printf("full message(%dB): %s", sizeof(message), message);
+	message[num_bytes_to_write-1] = '\0';
+	//printf("full message(%dB): %s", sizeof(message), message);
 	write_file_1_arg.fd = fd;
 	write_file_1_arg.buffer.buffer_val = malloc(num_bytes_to_write);
-	printf("allocate buffer\n");
 	strcpy(write_file_1_arg.user_name, getpwuid(getuid())->pw_name);
-	printf("len buffer = %d, bytes written: %d\n", sizeof(buffer), num_bytes_to_write);
 	strcpy(write_file_1_arg.buffer.buffer_val, message);
 	//memcpy(write_file_1_arg.buffer.buffer_val, message, num_bytes_to_write);
-	printf("write to buffer in args\n");
 	//strcpy(write_file_1_arg.buffer.buffer_val, buffer);
 	write_file_1_arg.buffer.buffer_len = num_bytes_to_write;
 	result_3 = write_file_1(&write_file_1_arg, clnt);
 		if (result_3 == (write_output *) NULL) {
 			clnt_perror (clnt, "call failed");
 		}
-	buffer = (char *)malloc(result_3->out_msg.out_msg_len);
+	printf("receive reply \n")
+	buffer = malloc(result_3->out_msg.out_msg_len);
 	strcpy(buffer, result_3->out_msg.out_msg_val);
 	printf("%s\n", result_3->out_msg.out_msg_val);
 }
