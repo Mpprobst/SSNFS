@@ -186,7 +186,7 @@ int add_block() {
 	int size = lseek(mem, 0, SEEK_END);
 
 	printf("memory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE));
-	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
+	if ((size+BLOCK_SIZE)/1000000 > DISK_SIZE) {
 		printf("memory is full!\n");
 		return -1;
 	}
@@ -210,8 +210,8 @@ struct file_info create_file(char * username, char * filename) {
 	int meta_idx = -1;
 	for (; read(meta, &fi, sizeof(fi)) > 0;) {
 		// when file is deleted, curr size is set to -1
+		meta_idx++;
 		if (fi.curr_size == -1) {
-			meta_idx = i;
 			break;
 		}
 	}
@@ -219,10 +219,10 @@ struct file_info create_file(char * username, char * filename) {
 	memcpy(fi.username, username, USERNAME_LEN);
 	memcpy(fi.filename, filename, FILENAME_LEN);
 	fi.curr_size = 0;
-	if (meta_idx == -1) {
+	//if (meta_idx == -1) {
 		// append to metadata file
-		meta_idx = lseek(meta, 0, SEEK_END) / sizeof(fi) - 1;
-	}
+	//	meta_idx = lseek(meta, 0, SEEK_END) / sizeof(fi) - 1;
+	//}
 	lseek(meta, meta_idx*sizeof(fi), SEEK_SET);
 	write(meta, &fi, sizeof(fi));
 
@@ -278,7 +278,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 
 	// prepare reply
 	free(result.out_msg.out_msg_val);
-	result.fd=fi.fd;
+	result.fd=fd;
 	result.out_msg.out_msg_len=sizeof(message);
 	result.out_msg.out_msg_val=(char *)malloc(result.out_msg.out_msg_len);
   strcpy(result.out_msg.out_msg_val, message);
