@@ -257,17 +257,14 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		strcpy(message, "ERROR: File not opened.\nFile table is full. Please close a file to open a new one.\n");
 	}
 	else {
-		struct file_info fi;
-		// check if file is already open
-		int fd = is_file_open(argp->user_name, argp->file_name);
-		if (fd == -1) {
-			fi = file_exists(argp->user_name, argp->file_name);
-			sprintf(message, "Opened existing file: %s\n", fi.filename);
-		}
-		// file does not exist, create it
+		struct file_info fi = file_exists(argp->user_name, argp->file_name);
 		if (fi.curr_size == -1) {
+			// file does not exist, create it
 			fi = create_file(argp->user_name, argp->file_name);
 			sprintf(message, "Created new file: %s", fi.filename);
+		}
+		else {
+			sprintf(message, "Opened existing file: %s\n", fi.filename);
 		}
 		// if table entry is free. if free, username and filename are blank strings
 		strcpy(table[fd].username, fi.username);
