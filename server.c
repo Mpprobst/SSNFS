@@ -323,8 +323,9 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 	printf("\nIn server: %s writing %dB to fd:\n", argp->user_name, argp->numbytes, argp->fd);
 	init_disk();
 	static write_output result;
-	char message[100];
-	memset(message, ' ', 100);
+	int message_size = 100;
+	char message[message_size];
+	memset(message, ' ', message_size);
 
 	struct file_info fi = get_open_file(argp->fd);
 	// file is open
