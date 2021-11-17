@@ -70,23 +70,7 @@ void init_disk() {	// char * username
 		if (meta < 0) {
 			meta = open(metadata_filename, O_CREAT);
 		}
-		/*
-		// if user is new add them to the meta data and create space in the memory
-		int user_exists = -1;
-		struct file_info fi;
-		for (; read(mem, &fi, sizeof(fi)) > 0;) {
-			if (strcmp(fi.user, username)==0) {
-				user_exists = 1;
-			}
-		}
-		// add metadata for this user
-		if (user_exists == -1) {
 
-		}
-	*/
-	 //if (table == NULL) { // may need to do sizeof. might not need to do this at all actually
-	//	 table = malloc(sizeof(table_entry)*TABLE_SIZE);
-	// }
 		for (int i = 0; i < TABLE_SIZE; i++) {
 			memset(table[i].username, ' ', USERNAME_LEN);
 			memset(table[i].filename, ' ', FILENAME_LEN);
@@ -162,6 +146,7 @@ int get_free_block() {
 
 	for (int i = 0; i < n_blocks; i++) {
 		if (blocks[i] > 0) {
+			printf("Reallocating block %d\n", blocks[i]);
 			return blocks[i];
 		}
 	}
@@ -177,7 +162,7 @@ returns block idx of new block. if memory is full, return -1
 int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
 	int size = lseek(mem, 0, SEEK_END);
-
+	printf("Adding block to memory\n");
 	printf("memory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE));
 	if ((size+BLOCK_SIZE)/1000000 > DISK_SIZE) {
 		printf("memory is full!\n");
@@ -212,6 +197,9 @@ struct file_info create_file(char * username, char * filename) {
 	memcpy(fi.username, username, USERNAME_LEN);
 	memcpy(fi.filename, filename, FILENAME_LEN);
 	fi.curr_size = 0;
+	for (int i = 0; i < FILE_SIZE; i++) {
+		fi.blocks[i] = -1;
+	}
 	//if (meta_idx == -1) {
 		// append to metadata file
 	//	meta_idx = lseek(meta, 0, SEEK_END) / sizeof(fi) - 1;
@@ -334,6 +322,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
 	}
 	else {
+		int free_block = get_free_block();
 		int mem = open(memory_filename, O_RDWR);
 		int bytes_written = 0;
 		while (bytes_written < argp->numbytes) {
@@ -347,6 +336,23 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				bytes_to_write = bytes_in_block;
 			}
 
+			// if writing to a block which is not yet allocated, allocate it
+			if (fi.blocks[curr_block] == -1) {
+				int new_block = -1;
+				if (free_block == -1) {
+					// no free blocks
+					new_block = add_block();
+				}
+				else {
+					// use the free block, get next free block
+					new_block = free_block;
+					free_block = get_free_block();
+				}
+
+				fi.blocks[new_block] = new_block;
+				curr_block = new_block;
+			}
+
 			// write to blocks 512 bytes at a time
 			lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
 			write(mem, &argp->buffer.buffer_val+bytes_written, bytes_to_write);
@@ -357,6 +363,15 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		table[argp->fd].fp += bytes_written;
 		sprintf(message, "successfully wrote %d bytes to fd %d", bytes_written, argp->fd);
 
+		// update metadata with new info
+		int meta = open(metadata_filename, O_RDWR);
+		struct file_info info;
+		for (; read(meta, &info, sizeof(info)) > 0;) {
+			 if ((strcmp(fi.username, info.username) == 0) && (strcmp(fi.filename, info.filename) == 0)) {
+				 lseek(meta, -sizeof(fi), SEEK_CUR);
+				 write(meta, &fi, sizeof(fi));
+			 }
+		}
 	}
 
 	free(result.out_msg.out_msg_val);
