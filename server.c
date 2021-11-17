@@ -15,6 +15,10 @@
 #define FILE_SIZE 64	// blocks
 #define DISK_SIZE 16 // MB
 #define TABLE_SIZE 20	// number of files that may be open at a time
+#define USERNAME_LEN 15
+#define FILENAME_LEN 20
+#define MAX_USERS 10
+#define FILES_PER_USER 50
 
 /*
 Must use a linux file (.dat) as a virtual disk to store client files.
@@ -26,14 +30,11 @@ This persists such that memory can be restored if client crashes.
 	if server crashes, file table is preserved and can be loaded
 */
 
-const char * vm_filename = "virtual_mem.dat";
-const char * ft_filename = "file_table.dat";
-//char * dict_filename = "file_dict.dat";
-
 struct table_entry {
-	int fd;				// file descriptor - where in vm file is
+	//int fd;				// unique identifier for the file
+	char username[USERNAME_LEN];
+	char filename[FILENAME_LEN];
 	int fp;				// location of file pointer
-	int op;				// operation id. what user is doing to file: 0-open, 1-read, 2-write
 };
 
 // structure of a file stored in the virtual memory.
@@ -41,150 +42,193 @@ struct table_entry {
 // cut into the space available for data, but it is the user's responsibility to
 // give names that do not take up too much space.
 struct file_info {
-  char user[10];
-	char name[10];
-	// TODO add int for space used. This tells us how far in the user may read
-	char data[FILE_SIZE*BLOCK_SIZE-20];
+  char username[USERNAME_LEN];
+	char namename[FILENAME_LEN];
+	int blocks[FILE_SIZE];
+	int curr_size;	// how many bytes have been written to the file
 };
 
-// TODO: try storing a dictionary of which users own which files
+// 16MB of data stores server files
+const char * memory_filename = "memory.dat";
+// contains info on which files each user owns
+const char * metadata_filename = "metadata.dat";
+// file table tracking what files are currently open
+struct table_entry table[TABLE_SIZE];
+int initialized = -1;
 
 /*
-Creates the virtual disk and file table if they do not exist.
-If file table exists, its state is restored (TODO)
+Creates the disk, metadata, and file table if they do not exist.
 */
-void init_disk() {
- int vm = open(vm_filename, O_RDONLY);
- if (vm < 0) {
-	 vm = open(vm_filename, O_CREAT);
- }
+void init_disk() {	// char * username
+	if (initialized == -1) {
+		int mem = open(memory_filename, O_RDONLY);
+		if (mem < 0) {
+			mem = open(memory_filename, O_CREAT);
+		}
 
- int ft = open(ft_filename, O_RDONLY);
- if (ft < 0) {
-	 ft = open(ft_filename, O_CREAT);
- }
+		int meta = open(metadata_filename, O_RDONLY);
+		if (meta < 0) {
+			meta = open(metadata_filename, O_CREAT);
+		}
+		/*
+		// if user is new add them to the meta data and create space in the memory
+		int user_exists = -1;
+		struct file_info fi;
+		for (; read(mem, &fi, sizeof(fi)) > 0;) {
+			if (strcmp(fi.user, username)==0) {
+				user_exists = 1;
+			}
+		}
+		// add metadata for this user
+		if (user_exists == -1) {
 
- close(vm);
- close(ft);
+		}
+	*/
+	 //if (table == NULL) { // may need to do sizeof. might not need to do this at all actually
+	//	 table = malloc(sizeof(table_entry)*TABLE_SIZE);
+	// }
+		for (int i = 0; i < TABLE_SIZE; i++) {
+			memset(table[i].username, ' ', USERNAME_LEN);
+			memset(table[i].filename, ' ', FILENAME_LEN);
+			table[i].fp = -1;
+		}
+		close(mem);
+		close(meta);
+	}
 }
-
 
 /*
 given a table, write to the file table file.
 called at the end of rpc operations that modify the table
 */
 void update_table(struct table_entry changed_entry) {
-	int table = open(ft_filename, O_RDWR);
-	lseek(table, 0, SEEK_SET);
-	struct table_entry entry;
 
-	for (; read(table, &entry, sizeof(entry)) > 0;) {
-		// seek to location of entry.
-		if (entry.fd == changed_entry.fd) {
-			lseek(table, -sizeof(entry), SEEK_CUR);
-			write(table, &changed_entry, sizeof(changed_entry));
-			break;
+}
+
+/*
+given a file descriptor, return metadata for the file
+*/
+struct file_info get_open_file(int fd) {
+	return table[fd];
+}
+
+/*
+check the file table if the file is already open.
+if so, return the index where the file exists
+*/
+int is_file_open(char * username, char * filename) {
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		if (strcmp(table[i].filename, filename)==0 && strcmp(table[i].username, username)==0) {
+		return i;
 		}
 	}
-
-	close(table);
+	return -1;
 }
 
 /*
-given the index of where a file is located, return a file info.
-
-*/
-struct file_info get_open_file(int loc) {
-	struct file_info file;
-	int mem = open(vm_filename, O_RDONLY);
-	lseek(mem, loc, SEEK_SET);
-	read(mem, &file, FILE_SIZE*BLOCK_SIZE-1);	// only read username and filename at first
-	//printf("size of memory: %ds size of file: %d\n", lseek(mem, 0, SEEK_END), sizeof(file));
-	close(mem);
-	return file;
-}
-
-/*
-check the file table if the file is already open. optionally enter the file descriptor
-if so, return table entry
-*/
-struct table_entry is_file_open(char * username, char * filename, int fd) {
-	int isopen = -1;
-	int table = open(ft_filename, O_RDONLY);
-	int mem = open(vm_filename, O_RDONLY);
-	struct table_entry entry;
-	struct file_info info;
-
-	lseek(table, 0, SEEK_SET);
-	// check if the file is open in the file table
-	for (; read(table, &entry, sizeof(entry)) > 0;) {
-		// seek to location of entry.
-		int loc = entry.fd;// * BLOCK_SIZE * FILE_SIZE;
-		lseek(mem, loc, SEEK_SET);
-		read(mem, &info, 20);	// only read username and filename at first
-		if ((strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) || fd == entry.fd) {
-			isopen = 0;
-			break;
-		}
-	}
-
-	lseek(mem, 0, SEEK_SET);
-	close(table);
-	close(mem);
-	if (isopen == -1) {
-		entry.fd = -1;
-		entry.fp = -1;
-		entry.op = -1;
-		printf("entry not found. file is not open\n");
-	}
-	else {
-		printf("found entry-> fd:%d, fp:%d, op:%d\n", entry.fd, entry.fp, entry.op);
-	}
-	return entry;
-}
-
-/*
-searches virtual disk for a file belonging to a specific user.
-returns: block idx in which file exists.
+searches metadata for a file belonging to a specific user.
+returns: -1 for failure, 1 for success
 */
 int file_exists(char * username, char * filename) {
 	int exists = -1;
-	int mem = open(vm_filename, O_RDONLY);
-	struct file_info info;
-
-	for (; read(mem, &info, sizeof(info)) > 0;) {
-		if (strcmp(info.name, filename)==0 && strcmp(info.user, username)==0) {
-			exists = read(mem, &info, BLOCK_SIZE * FILE_SIZE) - sizeof(info);
+	int meta = open(metadata_filename, O_RDONLY);
+	struct file_info fi;
+	for (; read(meta, &fi, sizeof(fi)) > 0;) {
+		if (strcmp(fi.filename, filename)==0 && strcmp(fi.username, username)==0) {
+			exists = 1;
 			break;
 		}
 	}
-	close(mem);
+	close(meta);
+	if (exists == -1) {
+		return NULL;
+	}
+	return fi;
+}
 
-	return exists;
+
+/*
+gets next available block in memory
+*/
+int get_free_block() {
+	int mem = open(memory_filename, O_RDONLY);
+	int meta = open(metadata_filename, O_RDONLY);
+
+	int n_blocks = lseek(mem, 0, SEEK_END) / BLOCK_SIZE - 1;
+	int blocks[n_blocks];
+	for (int i = 0; i < n_blocks; i++) {
+		blocks[i] = i;
+	}
+
+	struct file_info fi;
+	for (; read(meta, &fi, sizeof(fi)) > 0;) {
+		for (int i = 0; i < FILE_SIZE; i++) {
+			blocks[fi.blocks[i]] = -1;
+		}
+	}
+
+	for (int i = 0; i < n_blocks; i++) {
+		if (blocks[i] > 0) {
+			return blocks[i];
+		}
+	}
+	close(mem);
+	return -1;
+	//return add_block();
 }
 
 /*
-creates a file and adds it to the dictionary of files.
-returns: file descriptor of new file (location of where file was stored)
+appends a block of memory to disk.
+returns block idx of new block. if memory is full, return -1
 */
-int create_file(char * username, char * filename) {
-	struct file_info f;
-	memcpy(f.user, username, 10);
-	memcpy(f.name, filename, 10);
-	// TODO: Insert file in next free space. Do this after implementing delete
-	int mem = open(vm_filename, O_RDWR);
-	int loc = lseek(mem, 0, SEEK_END);
-	// TODO: check if memory is full
+int add_block() {
+	int mem = open(memory_filename, O_RDONLY);
+	int size = lseek(mem, 0, SEEK_END);
 
-	printf("memory used: %.2f of %d\n", ((double)loc+sizeof(f))/1000000, DISK_SIZE);
+	printf("memory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE);
 	if ((loc+sizeof(f))/1000000 > DISK_SIZE) {
 		printf("memory is full!\n");
+		return -1;
 	}
-  write(mem, &f, sizeof(f));
 
-	printf("user: %s created file: %s\n", f.user, f.name);
+	int n_blocks = size / BLOCK_SIZE - 1;
+	char blank[BLOCK_SIZE];
+	memset(blank, ' ', BLOCK_SIZE);
+	write(mem, blank, BLOCK_SIZE);
 	close(mem);
-	return loc;
+	return n_blocks+1;
+}
+
+/*
+creates file metadata and allocates memory for it on the disk
+returns: metadata for new file
+*/
+struct file_info create_file(char * username, char * filename) {
+	struct file_info fi;
+	int meta = open(metadata_filename, O_RDWR);
+	int size = lseek(mem, 0, SEEK_END);
+	int meta_idx = -1;
+	for (; read(meta, &fi, sizeof(fi)) > 0;) {
+		// when file is deleted, curr size is set to -1
+		if (fi.curr_size == -1) {
+			meta_idx = i;
+			break;
+		}
+	}
+
+	memcpy(fi.username, username, USERNAME_LEN);
+	memcpy(fi.filename, filename, FILENAME_LEN);
+	fi.curr_size = 0;
+	if (meta_idx == -1) {
+		// append to metadata file
+		meta_idx = lseek(meta, 0, SEEK_END) / sizeof(fi) - 1;
+	}
+	lseek(meta, meta_idx*sizeof(fi), SEEK_SET);
+	write(meta, &fi, sizeof(fi));
+
+	printf("user: %s created file: %s\n", fi.username, fi.filename);
+	close(meta);
+	return fi;
 }
 
 /*
@@ -194,37 +238,52 @@ File can only be 64 blocks long and is allocated on creation
 open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	init_disk();
 	static open_output result;
-	free(result.out_msg.out_msg_val);
-
 	printf("In server: filename recieved:%s\n",argp->file_name);
 	printf("In server username received:%s\n",argp->user_name);
 
-  struct table_entry entry = is_file_open(argp->user_name, argp->file_name, -1);
-	if (entry.fd == -1) {
-		// file isn't open get it from memory
-		int loc = file_exists(argp->user_name, argp->file_name);
-		if (loc == -1) {
-			// file does not exist, so create it
-			entry.fd = create_file(argp->user_name, argp->file_name);
-			entry.fp = 0;
-			entry.op = 0;
-			// for now just append to the file table
+	char message[512];
+	memset(message, ' ', 512);
+
+	// get open file table entry
+	int fd = -1;	// file descriptor will correlate to index in file table
+	for (int i = 0; i < TABLE_SIZE; i++) {
+		if (table[i].fp == -1) {
+			fd = i;
+			break;
 		}
-		// open the file aka add it to file table
-		int table = open(ft_filename, O_RDWR);
-		// TODO: check if file table is full
-		// TODO: fill in next available entry
-		int tbl_size = lseek(table, 0, SEEK_END);
-		write(table, &entry, sizeof(entry));
-		printf("added table entry for %s/%s at block %d. table is now size: %d\n", argp->user_name, argp->file_name, entry.fd, lseek(table, 0, SEEK_END));
-		close(table);
 	}
 
-	result.fd=entry.fd;
-	result.out_msg.out_msg_len=10;
-	result.out_msg.out_msg_val=(char *)malloc(result.out_msg.out_msg_len);
-  strcpy(result.out_msg.out_msg_val, argp->file_name);
+	if (fd == -1) {
+		strcpy(message, "ERROR: File not opened.\nFile table is full. Please close a file to open a new one.\n");
+	}
+	else {
+		// if table entry is free. if free, username and filename are blank strings
+		strcpy(table[i].username, fi.username);
+		strcpy(table[i].filename, fi.filename);
+		table[i].fp = 0;
 
+		struct file_info fi;
+		// check if file is already open
+		int fd = is_file_open(argp->user_name, argp->file_name);
+		if (fd == -1) {
+			fi = file_exists(argp->user_name, argp->file_name);
+			sprintf(message, "Opened existing file: %s\n", fi.filename);
+		}
+		// file does not exist, create it
+		if (fi == NULL) {
+			fi = create_file(argp->user_name, argp->file_name);
+			sprintf(message, "Created new file: %s", fi.filename);
+		}
+
+		printf("added table entry for %s/%s at block %d.\n", argp->user_name, argp->file_name, entry.fd));
+	}
+
+	// prepare reply
+	free(result.out_msg.out_msg_val);
+	result.fd=fi.fd;
+	result.out_msg.out_msg_len=sizeof(message);
+	result.out_msg.out_msg_val=(char *)malloc(result.out_msg.out_msg_len);
+  strcpy(result.out_msg.out_msg_val, message);
 	return &result;
 }
 
@@ -232,6 +291,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	init_disk();
 	// check if file is open. if not then do nothing and send err msg
 	static read_output result;
+	/*
 	free(result.out_msg.out_msg_val);
 	printf("user: %s requesting to read %d bytes from fd: %d\n", argp->user_name, argp->numbytes, argp->fd);
 
@@ -270,7 +330,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		// update the file table and save the new fp
 		update_table(entry);
 	}
-
+*/
 	return &result;
 }
 
@@ -278,6 +338,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
 	static write_output  result;
+	/*
 	free(result.out_msg.out_msg_val);
 	printf("user: %s requesting to write to file with descriptor: %d\n", argp->user_name, argp->fd);
 
@@ -301,7 +362,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			num_bytes_to_write = available_space;
 		}
 
-		int mem = open(vm_filename, O_RDWR);
+		int mem = open(memory_filename, O_RDWR);
 		lseek(mem, entry.fd+entry.fp+20, SEEK_SET);
 		write(mem, argp->buffer.buffer_val, num_bytes_to_write);
 		printf("memory written\n");
@@ -319,7 +380,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		// update the file table and save the new fp
 		update_table(entry);
 	}
-
+*/
 	return &result;
 }
 
@@ -331,10 +392,11 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	init_disk();
 	printf("\nServer: listing files.\n");
 	static list_output result;
+	/*
 	free(result.out_msg.out_msg_val);
 
 	// append file names to the result
-	int mem = open(vm_filename, O_RDONLY);
+	int mem = open(memory_filename, O_RDONLY);
 	struct file_info info;
 	int n_files = 0;
 	result.out_msg.out_msg_val = malloc(0);
@@ -365,6 +427,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	close(mem);
 	printf("%d files owned by %s:\n%s", n_files, argp->user_name, result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = n_files*11;
+	*/
 	return &result;
 }
 
