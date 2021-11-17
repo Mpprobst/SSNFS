@@ -125,20 +125,20 @@ int main (int argc, char *argv[])
 
 	int fd1 = Open("myfile");
 
-	Write(fd1, "hi this is my file. it only prints half.\n", 20);
+	//Write(fd1, "hi this is my file. it only prints half.\n", 20);
 
 	int fd2 = Open("secret");
 	int fd3 = Open("thirdfile");
 	int fd4 = Open("michael");
 
-	List();
+	//List();
 
 	int bytes_to_read = 20;
 	char buffer[bytes_to_read];
-	Read(fd1, buffer, bytes_to_read);
+	//Read(fd1, buffer, bytes_to_read);
 	printf("Reading fd %d:\n%s", fd1, buffer);
 
-	List();
+	//List();
 
 exit (0);
 }
