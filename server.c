@@ -350,7 +350,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			write(mem, &argp->buffer.buffer_val+bytes_written, bytes_to_write);
 			fi.curr_size += bytes_written;
 		}
-		table[fd].fp += bytes_written;
+		table[argp->fd].fp += bytes_written;
 	}
 	return &result;
 }
