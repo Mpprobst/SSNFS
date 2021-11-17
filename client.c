@@ -66,7 +66,7 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 		if (result_3 == (write_output *) NULL) {
 			clnt_perror (clnt, "call failed");
 		}
-	printf("receive reply \n")
+	printf("receive reply \n");
 	buffer = malloc(result_3->out_msg.out_msg_len);
 	strcpy(buffer, result_3->out_msg.out_msg_val);
 	printf("%s\n", result_3->out_msg.out_msg_val);
