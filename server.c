@@ -287,15 +287,19 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		memset(buffer, ' ', argp->numbytes);
 		int start = table[argp->fd].fp / BLOCK_SIZE;
 		for (int i = start; fi.blocks[i] > 0 && bytes_read < fi.curr_size; i++) {
-			int bytes_to_read = argp->numbytes - bytes_read;
-			if (bytes_to_read > BLOCK_SIZE) {
-				bytes_to_read = BLOCK_SIZE;
+			int bytes_in_block = BLOCK_SIZE;
+			if (i == start) {
+				bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
 			}
-			lseek(mem, fi.blocks[i] + BLOCK_SIZE);
+			int bytes_to_read = argp->numbytes - bytes_read;
+			if (bytes_to_read > bytes_in_block) {
+				bytes_to_read = bytes_in_block;
+			}
+			int read_loc = lseek(mem, (fi.blocks[i] * BLOCK_SIZE)+table[argp->fd].fp, SEEK_SET);
 			read(mem, &message+bytes_read, bytes_to_read);
 		 	bytes_read += bytes_to_read;
-			printf("read from fi.blocks[%d] = %d into message[%d]", i, fi.blocks[i], bytes_read);
-			printf("read %d/%d bytes = %s\n", bytes_to_read, bytes_read, message);
+			printf("read from fi.blocks[%d] = %d into message[%d]\n", i, fi.blocks[i], bytes_read);
+			printf("read mem loc %d\n %d/%d bytes = %s\n", read_loc, bytes_to_read, bytes_read, message);
 		}
 		message_size = bytes_read;
 		table[argp->fd].fp+=bytes_read;
