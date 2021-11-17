@@ -60,7 +60,7 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 	strcpy(write_file_1_arg.user_name, getpwuid(getuid())->pw_name);
 	strcpy(write_file_1_arg.buffer.buffer_val, message);
 	write_file_1_arg.buffer.buffer_len = num_bytes_to_write;
-	wirte_file_1_arg.numbytes = num_bytes_to_write;
+	write_file_1_arg.numbytes = num_bytes_to_write;
 	result_3 = write_file_1(&write_file_1_arg, clnt);
 		if (result_3 == (write_output *) NULL) {
 			clnt_perror (clnt, "call failed");
