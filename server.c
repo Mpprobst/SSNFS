@@ -291,7 +291,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			if (bytes_to_read > BLOCK_SIZE) {
 				bytes_to_read = BLOCK_SIZE;
 			}
-			lseek(mem, fi.blocks[i]+, BLOCK_SIZE);
+			lseek(mem, fi.blocks[i] + BLOCK_SIZE);
 			read(mem, &message+bytes_read, bytes_to_read);
 		 	bytes_read += bytes_to_read;
 			printf("read from fi.blocks[%d] = %d into message[%d]", i, fi.blocks[i], bytes_read);
