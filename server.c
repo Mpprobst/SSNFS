@@ -169,7 +169,7 @@ int add_block() {
 		return -1;
 	}
 
-	int n_blocks = size / BLOCK_SIZE - 1;
+	int n_blocks = size / BLOCK_SIZE;
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
 	write(mem, blank, BLOCK_SIZE);
