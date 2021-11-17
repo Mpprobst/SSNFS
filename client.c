@@ -30,6 +30,7 @@ indicator of error.
 returns: file descriptor of opened file.
 */
 int Open(char *filename_to_open){
+	printf("\nIn client: opening %s\n", filename_to_open);
   open_output  *result_1;
   open_input  open_file_1_arg;
   strcpy(open_file_1_arg.user_name, getpwuid(getuid())->pw_name);
@@ -47,7 +48,7 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
-	printf("client attempting to write\n");
+	printf("\nIn client: writing %s (%dB) to fd:%d\n", buffer, num_bytes_to_write, fd);
 	write_output *result_3;
 	write_input write_file_1_arg;
 	write_file_1_arg.fd = fd;
@@ -60,14 +61,13 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 		if (result_3 == (write_output *) NULL) {
 			clnt_perror (clnt, "call failed");
 		}
-	printf("client receive reply\n");
-
 	buffer = (char *)malloc(result_3->out_msg.out_msg_len);
 	strcpy(buffer, result_3->out_msg.out_msg_val);
 	printf("%s\n", result_3->out_msg.out_msg_val);
 }
 
 void Read(int fd, char * buffer, int num_bytes_to_read){
+	printf("\nIn client: reading %dB from fd: \n", num_bytes_to_read, fd);
   read_output * result_2;
 	read_input read_file_1_arg;
 	// ask server to read the file I own with a
@@ -83,6 +83,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 }
 
 void Close(int fd){
+	printf("\nIn client: closing fd: %dB", fd);
 	close_output  *result_6;
 	close_input  close_file_1_arg;
         result_6 = close_file_1(&close_file_1_arg, clnt);
@@ -92,7 +93,7 @@ void Close(int fd){
 }
 
 void List(){
-	printf("client requesting file list\n");
+	printf("\nIn client: requesting file list\n");
 	list_output  *result_4;
 	list_input  list_files_1_arg;
 	strcpy(list_files_1_arg.user_name, getpwuid(getuid())->pw_name);
@@ -103,7 +104,8 @@ void List(){
 	printf("files owned by: %s\n%s", list_files_1_arg.user_name, result_4->out_msg.out_msg_val);
 }
 
-void Delete(char * file_name){
+void Delete(int fd) {
+	printf("\nIn client: delete fd: %dB", fd);
 	delete_output  *result_5;
 	delete_input  delete_file_1_arg;
 	result_5 = delete_file_1(&delete_file_1_arg, clnt);
