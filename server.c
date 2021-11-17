@@ -99,14 +99,6 @@ void init_disk() {	// char * username
 }
 
 /*
-given a table, write to the file table file.
-called at the end of rpc operations that modify the table
-*/
-void update_table(struct table_entry changed_entry) {
-
-}
-
-/*
 check the file table if the file is already open.
 if so, return the index where the file exists
 */
@@ -240,8 +232,8 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	printf("\nIn server: %s attempting to open file: %s\n", argp->user_name, argp->file_name);
 	init_disk();
 	static open_output result;
-	char message[512];
-	memset(message, ' ', 512);
+	char message[100];
+	memset(message, ' ', 100);
 
 	// get open file table entry
 	int fd = -1;	// file descriptor will correlate to index in file table
@@ -282,99 +274,84 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 }
 
 read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
+	printf("\nIn server: %s attempting to read %dB from file: \n", argp->user_name, argp->numbytes, argp->fd);
 	init_disk();
 	// check if file is open. if not then do nothing and send err msg
 	static read_output result;
-	/*
-	free(result.out_msg.out_msg_val);
-	printf("user: %s requesting to read %d bytes from fd: %d\n", argp->user_name, argp->numbytes, argp->fd);
+	char * message;
+	int message_size;
+	//memset(message, ' ', 100);
 
-	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
-	int num_bytes_to_read = argp->numbytes;
-	if (entry.fd == -1) {
-		// file is not open
-		char * message = "file with given descriptor is not open or does not exist.\n";
-		result.out_msg.out_msg_len=sizeof(message);
-		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-		strcpy(result.out_msg.out_msg_val, message);
+	struct file_info fi = get_open_file(argp->fd);
+	// file is open
+	if (fi.curr_size == -1) {
+		message_size = 100;
+		message = malloc(message_size);
+		memset(message, ' ', message_size);
+		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
 	}
 	else {
-		// get file
-		struct file_info file = get_open_file(entry.fd);
-		printf("file: %s exists.\n", file.name);
-		// don't read past file size TODO send error instead
-		int available_space = (FILE_SIZE*BLOCK_SIZE) - 20;	// can use full filesize because entry.fp initialized to 20
-		if (available_space < num_bytes_to_read) {
-			num_bytes_to_read = available_space;
-		}
-		if (num_bytes_to_read >= sizeof(file.data)) {
-			num_bytes_to_read = sizeof(file.data);
+		// read the file
+		int mem = open(memory_filename, O_RDONLY);
+		int bytes_read = 0;
+		char buffer[argp->numbytes];
+		memset(buffer, ' ', argp->numbytes);
+		for (int i = 0; fi.blocks[i] > 0 && bytes_read < fi.curr_size; i++) {
+			int bytes_to_read = argp->numbytes - bytes_read;
+			if (bytes_to_read > BLOCK_SIZE) {
+				bytes_to_read = BLOCK_SIZE;
+			}
+			lseek(mem, fi.blocks[i], BLOCK_SIZE);
+			read(mem, &message+bytes_read+table[argp->fd].fp, bytes_to_read);
+		 	bytes_read += bytes_to_read;
 		}
 
-		char buffer[num_bytes_to_read];
-		memcpy(buffer, &file.data, num_bytes_to_read);
-		//entry.fp+=num_bytes_to_read;
-		entry.op = 1;
-		printf("allocating %dB\n", sizeof(buffer));
-		result.out_msg.out_msg_len=num_bytes_to_read;
-		result.out_msg.out_msg_val=(char*)malloc(sizeof(buffer));
-		strcpy(result.out_msg.out_msg_val, buffer);
-		printf("read file: %s from user %s\n", file.name, file.user);
-
-		// update the file table and save the new fp
-		update_table(entry);
+		table[argp->fd].fp+=bytes_read;
+		close(mem);
 	}
-*/
+	message_size = bytes_read;
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_msg_len=message_size;
+	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
+	strcpy(result.out_msg.out_msg_val, message);
+
 	return &result;
 }
 
 write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
+	printf("\nIn server: %s writing %dB to fd:\n", argp->user_name, argp->numbytes, argp->fd);
 	init_disk();
-	static write_output  result;
-	/*
-	free(result.out_msg.out_msg_val);
-	printf("user: %s requesting to write to file with descriptor: %d\n", argp->user_name, argp->fd);
+	static write_output result;
+	char message[100];
+	memset(message, ' ', 100);
 
-	struct table_entry entry = is_file_open(argp->user_name, "", argp->fd);
-	int num_bytes_to_write = argp->numbytes;
-
-	if (entry.fd == -1) {
-		// file is not open
-		char * message = "file with given descriptor is not open or does not exist.\n";
-		result.out_msg.out_msg_len=sizeof(message);
-		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-		strcpy(result.out_msg.out_msg_val, message);
+	struct file_info fi = get_open_file(argp->fd);
+	// file is open
+	if (fi.curr_size == -1) {
+		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
 	}
 	else {
-		// get file
-		struct file_info file = get_open_file(entry.fd);
-		// don't read past file size
-		int available_space = (FILE_SIZE*BLOCK_SIZE) - entry.fp - 20; // total file size needs to be subtracted by 20
-		printf("want to write %d bytes into available space = %d\n", num_bytes_to_write, available_space);
-		if (available_space < num_bytes_to_write) {
-			num_bytes_to_write = available_space;
-		}
-
 		int mem = open(memory_filename, O_RDWR);
-		lseek(mem, entry.fd+entry.fp+20, SEEK_SET);
-		write(mem, argp->buffer.buffer_val, num_bytes_to_write);
-		printf("memory written\n");
-		entry.fp+=num_bytes_to_write;
-		entry.op = 2;
-		char * message = (char *)malloc(512);
-		sprintf(message, "%d bytes written to %s\n", num_bytes_to_write, file.name);
-		result.out_msg.out_msg_len=sizeof(message);
-		result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
-		strcpy(result.out_msg.out_msg_val, message);
-		free(message);
-		printf("created message: %s\n", result.out_msg.out_msg_val);
-		printf("user %s wrote %d bytes to file: %s\n", file.user, num_bytes_to_write, file.name);
-		close(mem);
-		// update the file table and save the new fp
-		update_table(entry);
+		int bytes_written = 0;
+		while (bytes_written < argp->numbytes) {
+			// get correct block from fi based on curr_size
+			int curr_block = curr_size / BLOCK_SIZE;
+			int idx = fi.curr_size % BLOCK_SIZE;			// index into current block
+
+			int bytes_to_write = argp->numbytes - bytes_written;
+			int bytes_in_block = BLOCK_SIZE - idx;
+			if (bytes_to_write > bytes_in_block) {
+				bytes_to_write = bytes_in_block;
+			}
+
+			// write to blocks 512 bytes at a time
+			lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
+			write(mem, &argp->buffer.buffer_val+bytes_written, bytes_to_write);
+			fi.curr_size += bytes_written;
+		}
+		table[fd].fp += bytes_written;
 	}
-*/
 	return &result;
 }
 
