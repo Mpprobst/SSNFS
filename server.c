@@ -286,7 +286,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		char buffer[argp->numbytes];
 		memset(buffer, ' ', argp->numbytes);
 		int start = table[argp->fd].fp / BLOCK_SIZE;
-		for (int i = start; fi.blocks[i] > 0 && bytes_read < fi.curr_size; i++) {
+		for (int i = start; (fi.blocks[i] > -1) && (bytes_read < fi.curr_size - table[argp->fd].fp); i++) {
 			int bytes_in_block = BLOCK_SIZE;
 			if (i == start) {
 				bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
