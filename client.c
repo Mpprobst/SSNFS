@@ -39,9 +39,9 @@ int Open(char *filename_to_open){
 		clnt_perror (clnt, "call failed");
 	}
 	//printf ("In client: Directory name is:%s \nIn client: Name of the file opened is:%s \nIn client: file descriptor returned is:%d\n", open_file_1_arg.user_name, result_1->out_msg.out_msg_val,  result_1->fd);
-	printf("In client: %s\n", result_1.out_msg.out_msg_val);
-	if (result_1.fd > -1) {
-		printf("In client: file descriptor returned is:%d\n", result_1.fd);
+	printf("In client: %s\n", result_1->out_msg.out_msg_val);
+	if (result_1->fd > -1) {
+		printf("In client: file descriptor returned is:%d\n", result_1->fd);
 	}
 	return result_1->fd;
 }
