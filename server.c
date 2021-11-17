@@ -237,11 +237,9 @@ Opens or creates a file of name provided by client.
 File can only be 64 blocks long and is allocated on creation
 */
 open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
+	printf("\nIn server: %s attempting to open file: %s", argp->user_name, argp->file_name);
 	init_disk();
 	static open_output result;
-	printf("In server: filename recieved:%s\n",argp->file_name);
-	printf("In server username received:%s\n",argp->user_name);
-
 	char message[512];
 	memset(message, ' ', 512);
 
