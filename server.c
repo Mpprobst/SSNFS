@@ -305,11 +305,11 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			read(mem, &message+bytes_read+table[argp->fd].fp, bytes_to_read);
 		 	bytes_read += bytes_to_read;
 		}
-
+		message_size = bytes_read;
 		table[argp->fd].fp+=bytes_read;
 		close(mem);
 	}
-	message_size = bytes_read;
+
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len=message_size;
 	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
@@ -336,7 +336,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		int bytes_written = 0;
 		while (bytes_written < argp->numbytes) {
 			// get correct block from fi based on curr_size
-			int curr_block = curr_size / BLOCK_SIZE;
+			int curr_block = fi.curr_size / BLOCK_SIZE;
 			int idx = fi.curr_size % BLOCK_SIZE;			// index into current block
 
 			int bytes_to_write = argp->numbytes - bytes_written;
