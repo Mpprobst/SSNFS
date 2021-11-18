@@ -97,7 +97,7 @@ int is_file_open(char * username, char * filename) {
 
 /*
 searches metadata for a file belonging to a specific user.
-returns: -1 for failure, 1 for success
+returns: file info for found file
 */
 struct file_info file_exists(char * username, char * filename) {
 	int exists = -1;
@@ -449,48 +449,50 @@ delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
 	static delete_output result;
-	char message[40];
-	// if file is open, close it
-	// get the idx then replace it with a new file info (no specified user or name)
-	// clear all blocks that file was occupying.
-	if (argp->fd >= TABLE_SIZE) {
-		strcpy(message, "ERROR: invalid file descriptor\n");
-	}
-	if (table[argp->fd].fp == -1) {
-		strcpy(message, "ERROR: that file is not open\n");
-	}
+	char message[60];
 
-	sprintf(message, "%c deleted.\n", table[argp->fd].filename);
-	memset(table[argp->fd].username, ' ', USERNAME_LEN);
-	memset(table[argp->fd].filename, ' ', FILENAME_LEN);
-	table[argp->fd].fp = -1;
-
-	struct file_info fi = get_open_file(argp->fd);
-	memset(fi.username, ' ', USERNAME_LEN);
-	memset(fi.filename, ' ', FILENAME_LEN);
-	char empty[BLOCK_SIZE];
-	memset(empty, ' ', BLOCK_SIZE);
-	int mem = open(memory_filename, O_RDWR);
-	for (int i = 0; i < FILE_SIZE; i++) {
-		if (fi.blocks[i] > -1) {
-			lseek(mem, fi.blocks[i]*BLOCK_SIZE, SEEK_SET);
-			write(mem, empty, BLOCK_SIZE);
-			fi.blocks[i] = -1;
+	int fd = is_file_open(argp->user_name, argp->file_name);
+	struct file_info fi = file_exists(argp->user_name, argp->file_name);
+	if (fi.curr_size > -1) {
+		if (fd > -1) {
+			memset(table[fd].username, ' ', USERNAME_LEN);
+			memset(table[fd].filename, ' ', FILENAME_LEN);
+			table[fd].fp = -1;
 		}
+		memset(fi.username, ' ', USERNAME_LEN);
+		memset(fi.filename, ' ', FILENAME_LEN);
+		char empty[BLOCK_SIZE];
+		memset(empty, ' ', BLOCK_SIZE);
+		int mem = open(memory_filename, O_RDWR);
+		for (int i = 0; i < FILE_SIZE; i++) {
+			if (fi.blocks[i] > -1) {
+				lseek(mem, fi.blocks[i]*BLOCK_SIZE, SEEK_SET);
+				write(mem, empty, BLOCK_SIZE);
+				fi.blocks[i] = -1;
+			}
+		}
+		fi.curr_size = -1;
+
+		int meta = open(metadata_filename, O_RDWR);
+		struct file_info info;
+		for (; read(meta, &info, sizeof(info)) > 0;) {
+			 if ((strcmp(fi.username, info.username) == 0) && (strcmp(fi.filename, info.filename) == 0)) {
+				 lseek(meta, -sizeof(fi), SEEK_CUR);
+				 write(meta, &fi, sizeof(fi));
+			 }
+		}
+		close(meta);
+		sprintf(message, "%s deleted.", argp->file_name);
 	}
-	fi.curr_size = -1;
-
-	int meta = open(metadata_filename, O_RDWR);
-	struct file_info info;
-	for (; read(meta, &info, sizeof(info)) > 0;) {
-		 if ((strcmp(fi.username, info.username) == 0) && (strcmp(fi.filename, info.filename) == 0)) {
-			 lseek(meta, -sizeof(fi), SEEK_CUR);
-			 write(meta, &fi, sizeof(fi));
-		 }
+	else {
+		// file does not exists
+		sprintf(message, "ERROR: file \"%s\" does not exist", argp->file_name);
 	}
-	close(meta);
 
-
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_msg_len = 60;
+	result.out_msg.out_msg_val = malloc(60);
+	strcpy(result.out_msg.out_msg_val, message);
 	return &result;
 }
 

@@ -111,11 +111,11 @@ void List(){
 	printf("files owned by: %s\n%s", list_files_1_arg.user_name, result_4->out_msg.out_msg_val);
 }
 
-void Delete(int fd) {
+void Delete(char * filename) {
 	printf("\nIn client: delete fd: %dB", fd);
 	delete_output  *result_5;
 	delete_input  delete_file_1_arg;
-	delete_file_1_arg.fd = fd;
+	strcpy(delete_file_1_arg.file_name, filename);
 	strcpy(delete_file_1_arg.user_name, getpwuid(getuid())->pw_name);
 	result_5 = delete_file_1(&delete_file_1_arg, clnt);
 	if (result_5 == (delete_output *) NULL) {
@@ -148,7 +148,7 @@ int main (int argc, char *argv[])
 
 	List();
 
-	Delete(fd1);
+	Delete("myfile");
 
 	fd1 = Open("myfile");
 
