@@ -432,7 +432,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			// resize files array
 			file_ct += 1;
 			free(files);
-			files = malloc(file_ct*entry_size));
+			files = malloc(file_ct*entry_size);
 			memset(files, ' ', file_ct*entry_size);
 			sprintf(files, "%s%02d: %s\n", temp, file_ct, fi.filename);
 			//strcpy()
