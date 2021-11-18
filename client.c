@@ -138,7 +138,7 @@ int main (int argc, char *argv[])
 
 	char long_str[1000];
 	memset(long_str, 'a', 1000);
-	Write(fd2,, long_str, 1000);
+	Write(fd2, long_str, 1000);
 
 	char buffer0[1000];
 	Read(fd2, buffer0, 1000);
