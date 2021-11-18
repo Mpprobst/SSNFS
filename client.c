@@ -135,10 +135,18 @@ int main (int argc, char *argv[])
 	Write(fd1, "hi this is my file. it only prints half.\n", 20);
 
 	int fd2 = Open("secret");
+
+	char long_str[1000];
+	memset(long_str, 'a', 1000);
+	Write(fd2,, long_str, 1000);
+
+	char buffer0[1000];
+	Read(fd2, buffer0, 1000);
+
 	int fd3 = Open("thirdfile");
 	int fd4 = Open("michael");
 
-	//List();
+	List();
 
 	int bytes_to_read = 20;
 	char buffer[bytes_to_read];
@@ -148,7 +156,7 @@ int main (int argc, char *argv[])
 	char buffer2[10];
 	Read(10, buffer2, 10);
 
-	//List();
+	List();
 
 exit (0);
 }

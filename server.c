@@ -273,9 +273,10 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	// file is open
 	if (fi.curr_size == -1) {
 		message_size = 100;
-		message = malloc(message_size);
-		memset(message, ' ', message_size);
-		strcpy(message, "ERROR: file with that descriptor is not open");
+		message = "ERROR: file with that descriptor is not open\n";
+		//message = malloc(message_size);
+		//memset(message, ' ', message_size);
+		//strcpy(message, "ERROR: file with that descriptor is not open");
 		//sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
 		printf("file %d is not open.\n", argp->fd);
 	}
@@ -325,7 +326,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	result.out_msg.out_msg_len=message_size;
 	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 	strcpy(result.out_msg.out_msg_val, message);
-
+	free(message);
 	return &result;
 }
 
@@ -413,44 +414,38 @@ lists all the files in the user's directory
 list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
-	printf("\nServer: listing files.\n");
+	printf("\nIn server: listing files owned by %s.\n", argp->user_naem);
 	static list_output result;
-	/*
-	free(result.out_msg.out_msg_val);
+	// look through meta data and append filenames to an array.
+	int meta = open(metadata_filename, O_RDONLY);
+	int file_ct = 0;
+	int entry_size = 4 + FILENAME_LEN + 1; // +4 for "XX: ", +1 for newline
+	char * files;
+	struct file_info fi;
 
-	// append file names to the result
-	int mem = open(memory_filename, O_RDONLY);
-	struct file_info info;
-	int n_files = 0;
-	result.out_msg.out_msg_val = malloc(0);
-	//char * files=malloc(0); // 10 for filename, 1 for newline
-	int range = lseek(mem, 0, SEEK_END) / (FILE_SIZE*BLOCK_SIZE);
-	printf("there are %d files in memory of size: %d\n", range, range*FILE_SIZE*BLOCK_SIZE);
-
-	// check if the file is open in the file table
-	for (int i = 0; i < range; i++) {
-		lseek(mem, i*FILE_SIZE*BLOCK_SIZE, SEEK_SET);
-		read(mem, &info, 20);
-		if (strcmp(info.user, argp->user_name)==0) {
-			// append filename
-			char temp[n_files*11];
-			memset(temp, ' ', n_files*11);
+	for (;read(meta, &fi, sizeof(fi));) {
+		if (strcmp(fi.username, argp->user_name == 0) {
+			char temp[file_ct*entry_size];
+			memset(temp, ' ', file_ct*entry_size);
 			strcpy(temp, result.out_msg.out_msg_val);
 
 			// resize files array
-			n_files += 1;
-			free(result.out_msg.out_msg_val);
-			result.out_msg.out_msg_val = malloc(n_files*11);
-			memset(result.out_msg.out_msg_val, ' ', n_files*11);
-			strcpy(result.out_msg.out_msg_val, temp);
-			strcat(result.out_msg.out_msg_val, info.name);
-			strcat(result.out_msg.out_msg_val, "\n");
+			file_ct += 1;
+			free(files);
+			files = malloc(file_ct*entry_size));
+			memset(files, ' ', file_ct*entry_size);
+			sprintf(files, "%s%02d: %s\n", temp, file_ct, fi.filename);
+			//strcpy()
+			//strcat(files, temp);
+			//strcat(files, info.name);
+			//strcat(files, "\n");
 		}
 	}
-	close(mem);
-	printf("%d files owned by %s:\n%s", n_files, argp->user_name, result.out_msg.out_msg_val);
-	result.out_msg.out_msg_len = n_files*11;
-	*/
+
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_msg_len = file_ct*entry_size;
+	result.out_msg.out_msg_val = (char *)malloc(result.out_msg.out_msg_len);
+	strcpy(result.out_msg.out_msg_val, files);
 	return &result;
 }
 
