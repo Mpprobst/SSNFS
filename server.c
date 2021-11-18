@@ -371,9 +371,9 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			write(mem, buf, bytes_to_write);
 			bytes_written += bytes_to_write;
 			table[argp->fd].fp += bytes_written;
+			fi.curr_size += bytes_written;
 		}
 		close(mem);
-		table[argp->fd].fp += bytes_written;
 		sprintf(message, "successfully wrote %d bytes to fd %d", bytes_written, argp->fd);
 
 		// update metadata with new info
