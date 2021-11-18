@@ -112,7 +112,7 @@ void List(){
 }
 
 void Delete(char * filename) {
-	printf("\nIn client: delete fd: %dB", fd);
+	printf("\nIn client: delete file %s", filename);
 	delete_output  *result_5;
 	delete_input  delete_file_1_arg;
 	strcpy(delete_file_1_arg.file_name, filename);
