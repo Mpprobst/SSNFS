@@ -414,7 +414,7 @@ lists all the files in the user's directory
 list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
-	printf("\nIn server: listing files owned by %s.\n", argp->user_naem);
+	printf("\nIn server: listing files owned by %s.\n", argp->user_name);
 	static list_output result;
 	// look through meta data and append filenames to an array.
 	int meta = open(metadata_filename, O_RDONLY);
@@ -424,7 +424,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	struct file_info fi;
 
 	for (;read(meta, &fi, sizeof(fi));) {
-		if (strcmp(fi.username, argp->user_name == 0) {
+		if (strcmp(fi.username, argp->user_name == 0)) {
 			char temp[file_ct*entry_size];
 			memset(temp, ' ', file_ct*entry_size);
 			strcpy(temp, result.out_msg.out_msg_val);
