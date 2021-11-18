@@ -90,8 +90,8 @@ void Close(int fd){
 	printf("\nIn client: closing fd: %dB", fd);
 	close_output  *result_6;
 	close_input  close_file_1_arg;
-	read_file_1_arg.fd = fd;
-	strcpy(read_file_1_arg.user_name, getpwuid(getuid())->pw_name);
+	close_file_1_arg.fd = fd;
+	strcpy(close_file_1_arg.user_name, getpwuid(getuid())->pw_name);
   result_6 = close_file_1(&close_file_1_arg, clnt);
 	if (result_6 == (close_output *) NULL) {
 		clnt_perror (clnt, "call failed");
@@ -115,8 +115,8 @@ void Delete(int fd) {
 	printf("\nIn client: delete fd: %dB", fd);
 	delete_output  *result_5;
 	delete_input  delete_file_1_arg;
-	read_file_1_arg.fd = fd;
-	strcpy(read_file_1_arg.user_name, getpwuid(getuid())->pw_name);
+	delete_file_1_arg.fd = fd;
+	strcpy(delete_file_1_arg.user_name, getpwuid(getuid())->pw_name);
 	result_5 = delete_file_1(&delete_file_1_arg, clnt);
 	if (result_5 == (delete_output *) NULL) {
 		clnt_perror (clnt, "call failed");
