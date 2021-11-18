@@ -459,8 +459,7 @@ delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 			memset(table[fd].filename, ' ', FILENAME_LEN);
 			table[fd].fp = -1;
 		}
-		memset(fi.username, ' ', USERNAME_LEN);
-		memset(fi.filename, ' ', FILENAME_LEN);
+
 		char empty[BLOCK_SIZE];
 		memset(empty, ' ', BLOCK_SIZE);
 		int mem = open(memory_filename, O_RDWR);
@@ -478,6 +477,8 @@ delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 		for (; read(meta, &info, sizeof(info)) > 0;) {
 			 if ((strcmp(fi.username, info.username) == 0) && (strcmp(fi.filename, info.filename) == 0)) {
 				 lseek(meta, -sizeof(fi), SEEK_CUR);
+				 memset(fi.username, ' ', USERNAME_LEN);
+				 memset(fi.filename, ' ', FILENAME_LEN);
 				 write(meta, &fi, sizeof(fi));
 			 }
 		}

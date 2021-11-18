@@ -87,7 +87,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 }
 
 void Close(int fd){
-	printf("\nIn client: closing fd: %dB", fd);
+	printf("\nIn client: closing fd: %d", fd);
 	close_output  *result_6;
 	close_input  close_file_1_arg;
 	close_file_1_arg.fd = fd;
