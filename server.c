@@ -286,29 +286,36 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		memset(buffer, ' ', argp->numbytes);
 		int start = table[argp->fd].fp / BLOCK_SIZE;
 		int max_read = fi.curr_size - table[argp->fd].fp;
-
-		// TODO: if bytes to read > max_read return error that use r is tyring to read too much
-		printf("max bytes to read = %d-%d=%d\nstarting block = %d\n", fi.curr_size, table[argp->fd].fp, max_read, fi.blocks[start]);
-		for (int i = start; (fi.blocks[i] > -1) && (bytes_read < max_read); i++) {
-			int bytes_in_block = BLOCK_SIZE;
-			if (i == start) {
-				bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
+		if (max_read >= argp->numbytes) {
+			// TODO: if bytes to read > max_read return error that use r is tyring to read too much
+			//printf("max bytes to read = %d-%d=%d\nstarting block = %d\n", fi.curr_size, table[argp->fd].fp, max_read, fi.blocks[start]);
+			for (int i = start; (fi.blocks[i] > -1) && (bytes_read < max_read); i++) {
+				int bytes_in_block = BLOCK_SIZE;
+				if (i == start) {
+					bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
+				}
+				int bytes_to_read = argp->numbytes - bytes_read;
+				if (bytes_to_read > bytes_in_block) {
+					bytes_to_read = bytes_in_block;
+				}
+				int read_loc = lseek(mem, (fi.blocks[i] * BLOCK_SIZE)+table[argp->fd].fp, SEEK_SET);
+				read(mem, &buffer[bytes_read], bytes_to_read);
+			 	bytes_read += bytes_to_read;
+				//printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
+				//printf("read mem loc %d\n %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
 			}
-			int bytes_to_read = argp->numbytes - bytes_read;
-			if (bytes_to_read > bytes_in_block) {
-				bytes_to_read = bytes_in_block;
-			}
-			int read_loc = lseek(mem, (fi.blocks[i] * BLOCK_SIZE)+table[argp->fd].fp, SEEK_SET);
-			read(mem, &buffer[bytes_read], bytes_to_read);
-		 	bytes_read += bytes_to_read;
-			printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
-			printf("read mem loc %d\n %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
+			message_size = bytes_read;
+			message = malloc(message_size);
+			strcpy(message, buffer);
+			table[argp->fd].fp+=bytes_read;
+			close(mem);
 		}
-		message_size = bytes_read;
-		message = malloc(message_size);
-		strcpy(message, buffer);
-		table[argp->fd].fp+=bytes_read;
-		close(mem);
+		else {
+			// reading more than exists
+			message_size = 100;
+			message = malloc(message_size);
+			strcpy(message, "ERROR: read past end of file\n");
+		}
 	}
 
 	free(result.out_msg.out_msg_val);
