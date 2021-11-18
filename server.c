@@ -281,7 +281,6 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		printf("file %d is not open.\n", argp->fd);
 	}
 	else {
-		table[argp->fd].fp = 0;
 		// read the file
 		int mem = open(memory_filename, O_RDONLY);
 		int bytes_read = 0;
@@ -417,6 +416,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	static list_output result;
 	// look through meta data and append filenames to an array.
 	int meta = open(metadata_filename, O_RDONLY);
+	lseek(meta, 0, SEEK_SET);
 	int file_ct = 0;
 	int entry_size = 4 + FILENAME_LEN + 1; // +4 for "XX: ", +1 for newline
 	char * files = malloc(0);
@@ -424,10 +424,11 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 
 	for (;read(meta, &fi, sizeof(fi));) {
 		if (strcmp(fi.username, argp->user_name == 0)) {
+			printf("file: %s\n", fi.filename);
 			char temp[file_ct*entry_size];
 			memset(temp, ' ', file_ct*entry_size);
 			strcpy(temp, files);
-			printf("copied into temp: %s", temp);
+			printf("copied into temp: %s\n", temp);
 
 			// resize files array
 			file_ct += 1;
