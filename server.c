@@ -326,7 +326,6 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	result.out_msg.out_msg_len=message_size;
 	result.out_msg.out_msg_val=(char *) malloc(result.out_msg.out_msg_len);
 	strcpy(result.out_msg.out_msg_val, message);
-	free(message);
 	return &result;
 }
 
