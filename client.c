@@ -44,6 +44,7 @@ int Open(char *filename_to_open){
 	if (result_1->fd > -1) {
 		printf("In client: file descriptor returned is:%d\n", result_1->fd);
 	}
+
 	return result_1->fd;
 }
 
@@ -65,9 +66,6 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 		if (result_3 == (write_output *) NULL) {
 			clnt_perror (clnt, "call failed");
 		}
-	printf("receive reply \n");
-	buffer = malloc(result_3->out_msg.out_msg_len);
-	strcpy(buffer, result_3->out_msg.out_msg_val);
 	printf("%s\n", result_3->out_msg.out_msg_val);
 }
 
@@ -84,17 +82,21 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 	if (result_2 == (read_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
+	//memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
+	printf("%s", result_2->out_msg.out_msg_val);
 }
 
 void Close(int fd){
 	printf("\nIn client: closing fd: %dB", fd);
 	close_output  *result_6;
 	close_input  close_file_1_arg;
-        result_6 = close_file_1(&close_file_1_arg, clnt);
+	read_file_1_arg.fd = fd;
+	strcpy(read_file_1_arg.user_name, getpwuid(getuid())->pw_name);
+  result_6 = close_file_1(&close_file_1_arg, clnt);
 	if (result_6 == (close_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+	printf("%s", result_6->out_msg.out_msg_val);
 }
 
 void List(){
@@ -113,10 +115,13 @@ void Delete(int fd) {
 	printf("\nIn client: delete fd: %dB", fd);
 	delete_output  *result_5;
 	delete_input  delete_file_1_arg;
+	read_file_1_arg.fd = fd;
+	strcpy(read_file_1_arg.user_name, getpwuid(getuid())->pw_name);
 	result_5 = delete_file_1(&delete_file_1_arg, clnt);
 	if (result_5 == (delete_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+	printf("%s", result_5->out_msg.out_msg_val);
 }
 
 int main (int argc, char *argv[])
