@@ -420,7 +420,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	int meta = open(metadata_filename, O_RDONLY);
 	int file_ct = 0;
 	int entry_size = 4 + FILENAME_LEN + 1; // +4 for "XX: ", +1 for newline
-	char * files;
+	char * files = malloc(0);
 	struct file_info fi;
 
 	for (;read(meta, &fi, sizeof(fi));) {
