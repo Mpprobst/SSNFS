@@ -146,8 +146,6 @@ int main (int argc, char *argv[])
 	int fd3 = Open("thirdfile");
 	int fd4 = Open("michael");
 
-	List();
-
 	int bytes_to_read = 20;
 	char buffer[bytes_to_read];
 	Read(fd1, buffer, bytes_to_read);

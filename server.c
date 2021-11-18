@@ -427,7 +427,8 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 		if (strcmp(fi.username, argp->user_name == 0)) {
 			char temp[file_ct*entry_size];
 			memset(temp, ' ', file_ct*entry_size);
-			strcpy(temp, result.out_msg.out_msg_val);
+			strcpy(temp, files);
+			printf("copied into temp: %s", temp);
 
 			// resize files array
 			file_ct += 1;
@@ -435,13 +436,14 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			files = malloc(file_ct*entry_size);
 			memset(files, ' ', file_ct*entry_size);
 			sprintf(files, "%s%02d: %s\n", temp, file_ct, fi.filename);
+			printf("files: %s\n", files);
 			//strcpy()
 			//strcat(files, temp);
 			//strcat(files, info.name);
 			//strcat(files, "\n");
 		}
 	}
-
+	close(meta)
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = file_ct*entry_size;
 	result.out_msg.out_msg_val = (char *)malloc(result.out_msg.out_msg_len);
