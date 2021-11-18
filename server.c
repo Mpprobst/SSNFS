@@ -268,7 +268,6 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	static read_output result;
 	char * message;
 	int message_size;
-	//memset(message, ' ', 100);
 
 	struct file_info fi = get_open_file(argp->fd);
 	// file is open
@@ -364,8 +363,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			int mem_loc = lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
 			char buf[bytes_to_write];
 			memcpy(buf, &argp->buffer.buffer_val[bytes_written], bytes_to_write);
-			printf("wrote to mem loc: %d: %s\n", mem_loc, buf);
-			//write(mem, &argp->buffer.buffer_val+bytes_written, bytes_to_write);
+			printf("\twrote to addr: %d: %s\n", mem_loc, buf);
 			write(mem, buf, bytes_to_write);
 			bytes_written += bytes_to_write;
 			table[argp->fd].fp += bytes_written;
