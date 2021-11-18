@@ -423,7 +423,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	char * files = malloc(0);
 	struct file_info fi;
 
-	for (;read(meta, &fi, sizeof(fi));)
+	for (;read(meta, &fi, sizeof(fi));) {
 		printf("read: %s\n", fi.filename);
 		if (strcmp(fi.username, argp->user_name == 0)) {
 			printf("file: %s\n", fi.filename);
