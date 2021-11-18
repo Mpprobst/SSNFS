@@ -396,6 +396,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				 write(meta, &fi, sizeof(fi));
 			 }
 		}
+		close(meta);
 	}
 
 	free(result.out_msg.out_msg_val);
