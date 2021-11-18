@@ -443,7 +443,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			//strcat(files, "\n");
 		}
 	}
-	close(meta)
+	close(meta);
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = file_ct*entry_size;
 	result.out_msg.out_msg_val = (char *)malloc(result.out_msg.out_msg_len);
