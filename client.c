@@ -134,6 +134,21 @@ int main (int argc, char *argv[])
 
 	Write(fd1, "hi this is my file. it only prints half.\n", 20);
 
+	Close(fd1);
+
+	fd1 = Open("myfile");
+
+	char buffer1[20];
+	Read(fd1, buffer1, 20);
+
+	List();
+
+	Delete(fd1);
+
+	fd1 = Open("myfile");
+
+	Read(fd1, buffer1, 20);
+	/*
 	int fd2 = Open("secret");
 
 	char long_str[1000];
@@ -146,6 +161,8 @@ int main (int argc, char *argv[])
 	int fd3 = Open("thirdfile");
 	int fd4 = Open("michael");
 
+	List();
+
 	int bytes_to_read = 20;
 	char buffer[bytes_to_read];
 	Read(fd1, buffer, bytes_to_read);
@@ -155,6 +172,6 @@ int main (int argc, char *argv[])
 	Read(10, buffer2, 10);
 
 	List();
-
+*/
 exit (0);
 }

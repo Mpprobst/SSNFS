@@ -424,13 +424,10 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	struct file_info fi;
 
 	for (; read(meta, &fi, sizeof(fi)) > 0 ;) {
-		printf("read: %s\n", fi.filename);
 		if (strcmp(fi.username, argp->user_name) == 0) {
-			printf("file: %s\n", fi.filename);
 			char temp[file_ct*entry_size];
 			memset(temp, ' ', file_ct*entry_size);
 			strcpy(temp, files);
-			printf("copied into temp: %s\n", temp);
 
 			// resize files array
 			file_ct += 1;
@@ -438,11 +435,6 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			files = malloc(file_ct*entry_size);
 			memset(files, ' ', file_ct*entry_size);
 			sprintf(files, "%s%02d: %s\n", temp, file_ct, fi.filename);
-			printf("files: %s\n", files);
-			//strcpy()
-			//strcat(files, temp);
-			//strcat(files, info.name);
-			//strcat(files, "\n");
 		}
 	}
 	close(meta);
@@ -455,9 +447,48 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 
 delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 {
-	static delete_output  result;
+	init_disk();
+	static delete_output result;
+	char message[40];
 	// if file is open, close it
 	// get the idx then replace it with a new file info (no specified user or name)
+	// clear all blocks that file was occupying.
+	if (argp->fd >= TABLE_SIZE) {
+		strcpy(message, "ERROR: invalid file descriptor\n");
+	}
+	if (table[argp->fd].fp == -1) {
+		strcpy(message, "ERROR: that file is not open\n");
+	}
+
+	sprintf(message, "%c deleted.\n", table[argp->fd].filename);
+	memset(table[argp->fd].username, ' ', USERNAME_LEN);
+	memset(table[argp->fd].filename, ' ', FILENAME_LEN);
+	table[argp->fd].fp = -1;
+
+	struct file_info fi = get_open_file(argp->fd);
+	memset(fi.username, ' ', USERNAME_LEN);
+	memset(fi.filename, ' ', FILENAME_LEN);
+	char empty[BLOCK_SIZE];
+	memset(empty, ' ', BLOCK_SIZE);
+	int mem = open(memory_filename, O_RDWR);
+	for (int i = 0; i < FILE_SIZE; i++) {
+		if (fi.blocks[i] > -1) {
+			lseek(mem, fi.blocks[i]*BLOCK_SIZE, SEEK_SET);
+			write(mem, empty, BLOCK_SIZE);
+			fi.blocks[i] = -1;
+		}
+	}
+	fi.curr_size = -1;
+
+	int meta = open(metadata_filename, O_RDWR);
+	struct file_info info;
+	for (; read(meta, &info, sizeof(info)) > 0;) {
+		 if ((strcmp(fi.username, info.username) == 0) && (strcmp(fi.filename, info.filename) == 0)) {
+			 lseek(meta, -sizeof(fi), SEEK_CUR);
+			 write(meta, &fi, sizeof(fi));
+		 }
+	}
+	close(meta);
 
 
 	return &result;
@@ -465,10 +496,26 @@ delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 
 close_output * close_file_1_svc(close_input *argp, struct svc_req *rqstp)
 {
-	static close_output  result;
+	init_disk();
+	static close_output result;
+	char message[40];
+	memset(message, ' ', 40);
+	if (argp->fd >= TABLE_SIZE) {
+		strcpy(message, "ERROR: invalid file descriptor\n");
+	}
+	if (table[argp->fd].fp == -1) {
+		strcpy(message, "ERROR: that file is not open\n");
+	}
 
-	// check if file is open
-	// if so, remove it from the file table.
+	sprintf(message, "%c closed.\n", table[argp->fd].filename);
+	memset(table[argp->fd].username, ' ', USERNAME_LEN);
+	memset(table[argp->fd].filename, ' ', FILENAME_LEN);
+	table[argp->fd].fp = -1;
+
+	free(result.out_msg.out_msg_val);
+	result.out_msg.out_msg_len = 40;
+	result.out_msg.out_msg_val = malloc(40);
+	strcpy(result.out_msg.out_msg_val, message);
 
 	return &result;
 }
