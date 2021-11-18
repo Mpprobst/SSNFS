@@ -299,12 +299,14 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 				bytes_to_read = bytes_in_block;
 			}
 			int read_loc = lseek(mem, (fi.blocks[i] * BLOCK_SIZE)+table[argp->fd].fp, SEEK_SET);
-			read(mem, &message+bytes_read, bytes_to_read);
+			read(mem, &buffer[bytes_read], bytes_to_read);
 		 	bytes_read += bytes_to_read;
-			printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, message);
+			printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
 			printf("read mem loc %d\n %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
 		}
 		message_size = bytes_read;
+		message = malloc(message_size);
+		strcpy(message, buffer);
 		table[argp->fd].fp+=bytes_read;
 		close(mem);
 	}
