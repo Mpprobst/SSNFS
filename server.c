@@ -285,7 +285,11 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		char buffer[argp->numbytes];
 		memset(buffer, ' ', argp->numbytes);
 		int start = table[argp->fd].fp / BLOCK_SIZE;
-		for (int i = start; (fi.blocks[i] > -1) && (bytes_read < fi.curr_size - table[argp->fd].fp); i++) {
+		int max_read = fi.curr_size - table[argp->fd].fp;
+
+		// TODO: if bytes to read > max_read return error that use r is tyring to read too much
+		printf("max bytes to read = %d\nstarting block = ", max_read, fi.blocks[start]);
+		for (int i = start; (fi.blocks[i] > -1) && (bytes_read < max_read); i++) {
 			int bytes_in_block = BLOCK_SIZE;
 			if (i == start) {
 				bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
