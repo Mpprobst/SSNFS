@@ -275,8 +275,9 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		message_size = 100;
 		message = malloc(message_size);
 		memset(message, ' ', message_size);
-		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
-		printf("file %d does not exist\n", argp->fd);
+		strcpy(message, "ERROR: file with that descriptor is not open");
+		//sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
+		printf("file %d is not open.\n", argp->fd);
 	}
 	else {
 		table[argp->fd].fp = 0;
