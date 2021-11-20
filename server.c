@@ -380,6 +380,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			// get correct block from fi based on curr_size
 			curr_block = table[argp->fd].fp / BLOCK_SIZE;
 			if (curr_block >= FILE_SIZE) {
+				success = -1;
 				break;
 			}
 			int idx = table[argp->fd].fp % BLOCK_SIZE;			// index into current block
@@ -428,7 +429,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		if (success == 1) {
 			sprintf(message, "%d bytes written to fd %d\n", bytes_written, argp->fd);
 		}
-		else if (curr_block >= FILE_SIZE) {
+		if (curr_block >= FILE_SIZE) {
 			sprintf(message, "ERROR: write past EOF\n");
 			printf("%s", message);
 		}
