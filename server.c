@@ -375,9 +375,10 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		int free_block = get_free_block();
 		int mem = open(memory_filename, O_RDWR);
 		int bytes_written = 0;
-		while (bytes_written < argp->numbytes) {
+		int curr_block;
+		while (bytes_written < argp->numbytes && curr_block < FILE_SIZE) {
 			// get correct block from fi based on curr_size
-			int curr_block = table[argp->fd].fp / BLOCK_SIZE;
+			curr_block = table[argp->fd].fp / BLOCK_SIZE;
 			int idx = table[argp->fd].fp % BLOCK_SIZE;			// index into current block
 
 			int bytes_to_write = argp->numbytes - bytes_written;
@@ -401,7 +402,6 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 
 				fi.blocks[curr_block] = new_block;
 				//curr_block = new_block;
-				printf("wrote to block %d", curr_block);
 			}
 			// if new block is still -1, we have run out of space
 			if (curr_block == -1) {
@@ -410,7 +410,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				int success = -1;
 				break;
 			}
-			//printf("writing %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
+			printf("writing %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
 			// write to blocks 512 bytes at a time
 			int mem_loc = lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
 			char buf[bytes_to_write];
@@ -424,6 +424,10 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		close(mem);
 		if (success == 1) {
 			sprintf(message, "%d bytes written to fd %d", bytes_written, argp->fd);
+		}
+		else if (curr_block >= FILE_SIZE) {
+			sprintf(message, "ERROR: write past EOF\n");
+			printf("%s", message);
 		}
 
 		// update metadata with new info
