@@ -19,10 +19,11 @@
 #define FILENAME_LEN 20
 #define MAX_USERS 10
 #define FILES_PER_USER 50
+#define MEGABYTES 1048576
 
 /*
 Must use a linux file (.dat) as a virtual disk to store client files.
-Virtual disk is a sequence of blocks containing 512B with max size of 16MB (32,000 blocks)
+Virtual disk is a sequence of blocks containing 512B with max size of 16MB (32,000 blocks, 512 full files)
 Users are given a home directory, but cannot create subdirectories (handle this case)
 File table maintains information about files such as: user, fd, file pointer.
 This persists such that memory can be restored if client crashes.
@@ -168,8 +169,8 @@ int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
 	int size = lseek(mem, 0, SEEK_END);
 	//printf("Adding block to memory\n");
-	printf("memory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE));
-	if ((size+BLOCK_SIZE)/1000000 > DISK_SIZE) {
+	printf("memory used: %.2f of %d\n", ((double)size/MEGABYTES, DISK_SIZE));
+	if ((size+BLOCK_SIZE)/MEGABYTES > DISK_SIZE) {
 		printf("ERROR: memory is full!\n");
 		return -1;
 	}

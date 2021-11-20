@@ -164,7 +164,8 @@ void WriteTest() {
 
 	int fd2 = Open("test2");
 	// write a full file (plus extra block)
-	for (int i = 0; i < 65; i++) {
+	// allows only 512 files. do 1 more to see what happens after
+	for (int i = 0; i < 514; i++) {
 		printf("write %d", i);	// should only allow 64 writes for this file
 		Write(fd2, buffer, 512);
 	}
@@ -172,7 +173,7 @@ void WriteTest() {
 	// fill up memory completely
 	int fd3 = -1;
 	char fname3[10] = "test00000";
-	for (int i = 0; i < 32000; i++) {
+	for (int i = 0; i < 500; i++) {
 		sprintf(fname3, "test%05d\0", i);
 		printf("fname: %s", fname3);
 		fd3 = Open(fname3);
