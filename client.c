@@ -136,7 +136,7 @@ void OpenTest() {
 	}
 	for (int i = 0; i < 20; i++) {
 		sprintf(fname, "file%02d", i);
-		Close(fname);
+		Close(i);
 	}
 
 	// open same file many times
