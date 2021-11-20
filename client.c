@@ -180,7 +180,8 @@ int main (int argc, char *argv[])
 	ssnfsprog_1 (host);
 
 	// Test all cases for open
-	OpenTest();
+	//OpenTest();
+	WriteTest();
 	/*
 	int fd1 = Open("myfile");
 
