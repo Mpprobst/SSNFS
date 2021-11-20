@@ -367,6 +367,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 	if (argp->fd < TABLE_SIZE) {
 		fi = get_open_file(argp->fd);
 	}
+	printf("file: %s/%s size=%d", fi.username, fi.filename, fi.curr_size);
 	// file is open
 	if (fi.curr_size == -1) {
 		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
