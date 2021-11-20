@@ -152,7 +152,7 @@ void WriteTest() {
 	// write exactly 1 blocks
 	char buffer[512];
 	for (int i = 0; i < 512; i++) {
-		buffer[i] = i%26+'0'+97;
+		buffer[i] = 'a'+i%26;
 	}
 	Write(fd1, buffer, 512);
 
