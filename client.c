@@ -126,7 +126,10 @@ void Delete(char * filename) {
 
 void OpenTest() {
 	Open("test");
-	char long_name[33] = "this_is_a_really_long_file_name\0";
+	char * long_name = malloc(25);
+	memset(long_name, ' ', 25);
+	strcpy(long_name, "this_is_a_long_file_name");
+	long_name[24] = '\0';
 	Open(long_name);
 	/*char fname[7] = "file_00";
 	printf(fname);
