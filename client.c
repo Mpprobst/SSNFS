@@ -125,12 +125,7 @@ void Delete(char * filename) {
 }
 
 void OpenTest() {
-	Open("test");
-	char * long_name = malloc(25);
-	memset(long_name, ' ', 25);
-	strcpy(long_name, "this_is_a_long_file_name");
-	long_name[24] = '\0';
-	Open(long_name);
+	Open("this_is_a_long_file_name");
 	/*char fname[7] = "file_00";
 	printf(fname);
 	// open a bunch of files
