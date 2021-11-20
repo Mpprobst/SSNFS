@@ -157,7 +157,7 @@ void WriteTest() {
 	Write(fd1, buffer, 512);
 
 	Close(fd1);
-	fd1 = Open(fname);
+	fd1 = Open(fname1);
 	char result[512];
 	Read(fd1, result, 512);
 
