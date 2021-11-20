@@ -389,7 +389,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				//curr_block = new_block;
 			}
 			// if new block is still -1, we have run out of space
-			if (new_block == -1) {
+			if (curr_block == -1) {
 				printf("\tERROR: Write past EOF\n");
 				strcpy(message,"ERROR: Write past EOF. Please delete files to free up space.\n");
 				int success = -1;
