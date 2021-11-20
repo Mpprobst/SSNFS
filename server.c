@@ -237,11 +237,11 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		}
 	}
 	int valid = 1;
-	if (sizeof(argp->user_name) >= USERNAME_LEN) {
+	if (strlen(argp->user_name) >= USERNAME_LEN) {
 		valid = -1;
 		sprintf(message, "ERROR: username too long. Max usename length is %d \n", USERNAME_LEN);
 	}
-	else if (sizeof(argp->file_name) >= FILENAME_LEN) {
+	else if (strlen(argp->file_name) >= FILENAME_LEN) {
 		valid = -1;
 		sprintf(message, "ERROR: filename too long. Max filename length is %d\n", FILENAME_LEN);
 	}
