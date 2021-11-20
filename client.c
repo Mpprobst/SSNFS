@@ -127,7 +127,7 @@ void Delete(char * filename) {
 void OpenTest() {
 	char long_name[32] = "this_is_a_really_long_file_name";
 	Open(long_name);
-	char fname[7] = "file_00";
+	/*char fname[7] = "file_00";
 	printf(fname);
 	// open a bunch of files
 	for (int i = 0; i < 25; i++) {
@@ -138,7 +138,7 @@ void OpenTest() {
 		}
 		printf(fname);
 		Open(fname);
-	}
+	}*/
 }
 
 int main (int argc, char *argv[])
