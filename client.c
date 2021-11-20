@@ -173,8 +173,8 @@ void WriteTest() {
 	int fd3 = -1;
 	char fname3[10] = "test00000";
 	for (int i = 0; i < 32000; i++) {
-		sprintf(fname2, "test%05d\0", i);
-		fd3 = Open(fname2);
+		sprintf(fname3, "test%05d\0", i);
+		fd3 = Open(fname3);
 		for (int j = 0; j < 64; j++) {
 			Write(fd3, buffer, 512);
 		}
