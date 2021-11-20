@@ -162,10 +162,23 @@ void WriteTest() {
 	char result[512];
 	Read(fd1, result, 512);
 
+	int fd2 = Open("test2");
 	// write a full file (plus extra block)
 	for (int i = 0; i < 65; i++) {
 		printf("write %d", i);	// should only allow 64 writes for this file
-		Write(fd1, buffer, 512);
+		Write(fd2, buffer, 512);
+	}
+
+	// fill up memory completely
+	int fd3 = -1;
+	char fname3[10] = "test00000";
+	for (int i = 0; i < 32000; i++) {
+		sprintf(fname2, "test%05d\0", i);
+		fd3 = Open(fname2);
+		for (int j = 0; j < 64; j++) {
+			Write(fd3, buffer, 512);
+		}
+		Close(fd3);
 	}
 
 }
