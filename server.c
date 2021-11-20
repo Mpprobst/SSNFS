@@ -268,6 +268,9 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 			printf("open file %s/%s with fd: %d\n", argp->user_name, argp->file_name, fd);
 		}
 	}
+	else {
+		fd = -1;
+	}
 
 	// prepare reply
 	free(result.out_msg.out_msg_val);
