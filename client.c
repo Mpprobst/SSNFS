@@ -130,7 +130,7 @@ void OpenTest() {
 	// open a bunch of files
 	for (int i = 0; i < 25; i++) {
 		char fname[10];
-		memset(fname, ' ', 10);
+		//memset(fname, ' ', 10);
 		sprintf(fname, "file_%02d\0", i);
 		Open(fname);
 	}
