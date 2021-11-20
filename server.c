@@ -401,6 +401,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 
 				fi.blocks[curr_block] = new_block;
 				//curr_block = new_block;
+				printf("wrote to block %d", curr_block);
 			}
 			// if new block is still -1, we have run out of space
 			if (curr_block == -1) {
@@ -435,7 +436,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			 }
 		}
 		close(meta);
-		printf("%d bytes written.\nblocks used: %d", bytes_written, curr_block);
+		printf("%d bytes written.\n", bytes_written);
 	}
 
 	free(result.out_msg.out_msg_val);
