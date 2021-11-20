@@ -354,7 +354,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 
 write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
-	printf("\nIn server: %s writing %dB to fd:\n", argp->user_name, argp->numbytes, argp->fd);
+	printf("\nIn server: %s writing %dB to fd: %d\n", argp->user_name, argp->numbytes, argp->fd);
 	init_disk();
 	int success = 1;
 	static write_output result;
@@ -375,7 +375,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		int free_block = get_free_block();
 		int mem = open(memory_filename, O_RDWR);
 		int bytes_written = 0;
-		int curr_block;
+		int curr_block = 0;
 		while (bytes_written < argp->numbytes && curr_block < FILE_SIZE) {
 			// get correct block from fi based on curr_size
 			curr_block = table[argp->fd].fp / BLOCK_SIZE;
@@ -423,7 +423,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		}
 		close(mem);
 		if (success == 1) {
-			sprintf(message, "%d bytes written to fd %d", bytes_written, argp->fd);
+			sprintf(message, "%d bytes written to fd %d\n", bytes_written, argp->fd);
 		}
 		else if (curr_block >= FILE_SIZE) {
 			sprintf(message, "ERROR: write past EOF\n");
