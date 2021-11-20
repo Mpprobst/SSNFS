@@ -132,6 +132,7 @@ void OpenTest() {
 		char fname[10];
 		memset(fname, ' ', 10);
 		sprintf(fname, "file_%02d", i);
+		printf(fname);
 		Open(fname);
 	}
 }
