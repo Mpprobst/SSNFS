@@ -435,7 +435,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			 }
 		}
 		close(meta);
-		printf("%d bytes written.\n", bytes_written);
+		printf("%d bytes written.\nblocks used: %d", bytes_written, curr_block);
 	}
 
 	free(result.out_msg.out_msg_val);

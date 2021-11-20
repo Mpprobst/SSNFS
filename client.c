@@ -162,8 +162,9 @@ void WriteTest() {
 	char result[512];
 	Read(fd1, result, 512);
 
-	// write up all of memory
-	for (int i = 0; i < 32000; i++) {
+	// write a full file (plus extra block)
+	for (int i = 0; i < 65; i++) {
+		printf("write %d", i);	// should only allow 64 writes for this file
 		Write(fd1, buffer, 512);
 	}
 
