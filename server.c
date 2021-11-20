@@ -293,6 +293,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	if (argp->fd < TABLE_SIZE) {
 		fi = get_open_file(argp->fd);
 	}
+	printf("fi: %s/%s size=%d", fi.username, fi.filename, fi.curr_size);
 	// file is open
 	if (fi.curr_size == -1) {
 		message_size = 100;
