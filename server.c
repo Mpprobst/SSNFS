@@ -376,9 +376,12 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		int mem = open(memory_filename, O_RDWR);
 		int bytes_written = 0;
 		int curr_block = 0;
-		while (bytes_written < argp->numbytes && curr_block < FILE_SIZE) {
+		while (bytes_written < argp->numbytes) {
 			// get correct block from fi based on curr_size
 			curr_block = table[argp->fd].fp / BLOCK_SIZE;
+			if (curr_block >= FILE_SIZE) {
+				break;
+			}
 			int idx = table[argp->fd].fp % BLOCK_SIZE;			// index into current block
 
 			int bytes_to_write = argp->numbytes - bytes_written;
