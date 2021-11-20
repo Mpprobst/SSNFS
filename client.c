@@ -128,9 +128,9 @@ void OpenTest() {
 	char long_name[32] = "this_is_a_really_long_file_name";
 	Open(long_name);
 	// open a bunch of files
-	char fname[10];
-	memset(fname, ' ', 10);
 	for (int i = 0; i < 25; i++) {
+		char fname[10];
+		memset(fname, ' ', 10);
 		sprintf(fname, "file_%02d\0");
 		Open(fname);
 	}
