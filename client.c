@@ -129,6 +129,7 @@ void OpenTest() {
 	Open(long_name);
 	// open a bunch of files
 	for (int i = 0; i < 25; i++) {
+		printf("file: %02d", i);
 		char fname[10];
 		memset(fname, ' ', 10);
 		sprintf(fname, "file_%02d", i);
