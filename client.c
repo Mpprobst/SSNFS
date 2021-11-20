@@ -126,18 +126,13 @@ void Delete(char * filename) {
 
 void OpenTest() {
 	Open("this_is_a_long_file_name");
-	/*char fname[7] = "file_00";
-	printf(fname);
-	// open a bunch of files
+	char fname[6] = "file01";
 	for (int i = 0; i < 25; i++) {
-		printf("file: %02d", i);
-		fname[6] = (i%10)+'0';
-		if (i > 10) {
-			fname[5] = (i / 10)+'0';
-		}
-		printf(fname);
+		sprintf(fname, "file%02d", i);
+		printf("%s", fname);
 		Open(fname);
-	}*/
+	}
+	Open("file01");
 }
 
 int main (int argc, char *argv[])
