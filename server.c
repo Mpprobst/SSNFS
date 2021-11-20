@@ -120,6 +120,11 @@ struct file_info file_exists(char * username, char * filename) {
 given a file descriptor, return metadata for the file
 */
 struct file_info get_open_file(int fd) {
+	if (fd >= TABLE_SIZE) {
+		struct file_info dummy;
+		dummy.curr_size = -1;
+		return dummy;
+	}
 	struct table_entry entry = table[fd];
 	return file_exists(entry.username, entry.filename);
 }
@@ -146,7 +151,7 @@ int get_free_block() {
 
 	for (int i = 0; i < n_blocks; i++) {
 		if (blocks[i] > 0) {
-			printf("Reallocating block %d\n", blocks[i]);
+			//printf("Reallocating block %d\n", blocks[i]);
 			return blocks[i];
 		}
 	}
@@ -162,10 +167,10 @@ returns block idx of new block. if memory is full, return -1
 int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
 	int size = lseek(mem, 0, SEEK_END);
-	printf("Adding block to memory\n");
-	printf("memory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE));
+	//printf("\tAdding block to memory\n");
+	//printf("\tmemory used: %.2f of %d\n", ((double)size/1000000, DISK_SIZE));
 	if ((size+BLOCK_SIZE)/1000000 > DISK_SIZE) {
-		printf("memory is full!\n");
+		printf("ERROR: memory is full!\n");
 		return -1;
 	}
 
@@ -207,7 +212,7 @@ struct file_info create_file(char * username, char * filename) {
 	lseek(meta, meta_idx*sizeof(fi), SEEK_SET);
 	write(meta, &fi, sizeof(fi));
 
-	printf("user: %s created file: %s\n", fi.username, fi.filename);
+	printf("\tcreated file: %s/%s\n", fi.username, fi.filename);
 	close(meta);
 	return fi;
 }
@@ -234,6 +239,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 
 	if (fd == -1) {
 		strcpy(message, "ERROR: File not opened.\nFile table is full. Please close a file to open a new one.\n");
+		printf("\tERROR: File table is full.\n");
 	}
 	else {
 		struct file_info fi = file_exists(argp->user_name, argp->file_name);
@@ -249,7 +255,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 		strcpy(table[fd].username, fi.username);
 		strcpy(table[fd].filename, fi.filename);
 		table[fd].fp = 0;
-		printf("added table entry for %s/%s at fd: %d\n", argp->user_name, argp->file_name, fd);
+		printf("\topen file %s/%s with fd: %d\n", argp->user_name, argp->file_name, fd);
 	}
 
 	// prepare reply
@@ -269,16 +275,19 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	char * message;
 	int message_size;
 
-	struct file_info fi = get_open_file(argp->fd);
+	struct file_info fi;
+	if (argp->fd < TABLE_SIZE) {
+		fi = get_open_file(argp->fd);
+	}
 	// file is open
 	if (fi.curr_size == -1) {
 		message_size = 100;
-		message = "ERROR: file with that descriptor is not open\n";
+		message = "ERROR: file descriptor is either invalid or not in use.\n";
 		//message = malloc(message_size);
 		//memset(message, ' ', message_size);
 		//strcpy(message, "ERROR: file with that descriptor is not open");
 		//sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
-		printf("file %d is not open.\n", argp->fd);
+		printf("\tERROR: file is not open.\n", argp->fd);
 	}
 	else {
 		// read the file
@@ -311,13 +320,14 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			strcpy(message, buffer);
 			table[argp->fd].fp+=bytes_read;
 			close(mem);
+			printf("\tFile read successful\n");
 		}
 		else {
 			// reading more than exists
 			message_size = 100;
 			message = malloc(message_size);
 			strcpy(message, "ERROR: read past end of file\n");
-			printf("Read too far into file\n");
+			printf("\tERROR: Read past EOF\n");
 		}
 	}
 
@@ -332,15 +342,20 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 {
 	printf("\nIn server: %s writing %dB to fd:\n", argp->user_name, argp->numbytes, argp->fd);
 	init_disk();
+	int success = 1;
 	static write_output result;
 	int message_size = 100;
 	char message[message_size];
 	memset(message, ' ', message_size);
 
-	struct file_info fi = get_open_file(argp->fd);
+	struct file_info fi;
+	if (argp->fd < TABLE_SIZE) {
+		fi = get_open_file(argp->fd);
+	}
 	// file is open
 	if (fi.curr_size == -1) {
 		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
+		printf("\tERROR: file not open\n");
 	}
 	else {
 		int free_block = get_free_block();
@@ -373,19 +388,28 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				fi.blocks[curr_block] = new_block;
 				//curr_block = new_block;
 			}
-			printf("\twriting %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
+			// if new block is still -1, we have run out of space
+			if (new_block == -1) {
+				printf("\tERROR: Write past EOF\n");
+				strcpy(message,"ERROR: Write past EOF. Please delete files to free up space.\n");
+				int success = -1;
+				break;
+			}
+			//printf("\twriting %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
 			// write to blocks 512 bytes at a time
 			int mem_loc = lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
 			char buf[bytes_to_write];
 			memcpy(buf, &argp->buffer.buffer_val[bytes_written], bytes_to_write);
-			printf("\twrote to addr: %d: %s\n", mem_loc, buf);
+			//printf("\twrote to addr: %d: %s\n", mem_loc, buf);
 			write(mem, buf, bytes_to_write);
 			bytes_written += bytes_to_write;
 			table[argp->fd].fp += bytes_written;
 			fi.curr_size += bytes_written;
 		}
 		close(mem);
-		sprintf(message, "successfully wrote %d bytes to fd %d", bytes_written, argp->fd);
+		if (success == 1) {
+			sprintf(message, "%d bytes written to fd %d", bytes_written, argp->fd);
+		}
 
 		// update metadata with new info
 		int meta = open(metadata_filename, O_RDWR);
@@ -397,6 +421,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 			 }
 		}
 		close(meta);
+		printf("\t%d bytes written.\n", bytes_written);
 	}
 
 	free(result.out_msg.out_msg_val);
@@ -413,7 +438,7 @@ lists all the files in the user's directory
 list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 {
 	init_disk();
-	printf("\nIn server: listing files owned by %s.\n", argp->user_name);
+	printf("\nIn server: gathering list of files owned by %s.\n", argp->user_name);
 	static list_output result;
 	// look through meta data and append filenames to an array.
 	int meta = open(metadata_filename, O_RDONLY);
@@ -437,6 +462,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			sprintf(files, "%s%02d: %s\n", temp, file_ct, fi.filename);
 		}
 	}
+	printf("\t%d files beling to %s", file_ct, argp->user_name);
 	close(meta);
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = file_ct*entry_size;
@@ -484,10 +510,12 @@ delete_output * delete_file_1_svc(delete_input *argp, struct svc_req *rqstp)
 		}
 		close(meta);
 		sprintf(message, "%s deleted.", argp->file_name);
+		printf("\tFile deleted.\n");
 	}
 	else {
 		// file does not exists
 		sprintf(message, "ERROR: file \"%s\" does not exist", argp->file_name);
+		printf("\tERROR: File does not exist\n");
 	}
 
 	free(result.out_msg.out_msg_val);
@@ -505,9 +533,11 @@ close_output * close_file_1_svc(close_input *argp, struct svc_req *rqstp)
 	memset(message, ' ', 40);
 	if (argp->fd >= TABLE_SIZE) {
 		strcpy(message, "ERROR: invalid file descriptor\n");
+		printf("\t%s", message);
 	}
 	if (table[argp->fd].fp == -1) {
 		strcpy(message, "ERROR: that file is not open\n");
+		printf("\t%s", message);
 	}
 
 	sprintf(message, "%c closed.\n", table[argp->fd].filename);
