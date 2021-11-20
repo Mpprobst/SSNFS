@@ -49,6 +49,7 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
+	buffer[num_bytes_to_write-1] = '\0';
 	printf("\nIn client: writing \"%s\" (%dB) to fd:%d\n", buffer, num_bytes_to_write, fd);
 	write_output *result_3;
 	write_input write_file_1_arg;
@@ -83,7 +84,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 		clnt_perror (clnt, "call failed");
 	}
 	//memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
-	printf("File contents:\n%s+---------------+\n", result_2->out_msg.out_msg_val);
+	printf("File contents:\n%s\n+---------------+\n", result_2->out_msg.out_msg_val);
 }
 
 void Close(int fd){
@@ -162,9 +163,9 @@ void WriteTest() {
 	Read(fd1, result, 512);
 
 	// write up all of memory
-	//for (int i = 0; i < 32000; i++) {
-	//	Write(fd1, buffer, 512);
-	//}
+	for (int i = 0; i < 32000; i++) {
+		Write(fd1, buffer, 512);
+	}
 
 }
 
