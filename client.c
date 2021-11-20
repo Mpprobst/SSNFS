@@ -146,7 +146,7 @@ void OpenTest() {
 }
 
 void WriteTest() {
-	char fname1[6] = "myfile";
+	char fname1[7] = "myfile\0";
 	int fd1 = Open(fname1);
 
 	// write exactly 1 blocks
