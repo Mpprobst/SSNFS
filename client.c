@@ -83,7 +83,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 		clnt_perror (clnt, "call failed");
 	}
 	//memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
-	printf("%s", result_2->out_msg.out_msg_val);
+	printf("File contents:\n%s+---------------+\n", result_2->out_msg.out_msg_val);
 }
 
 void Close(int fd){
@@ -125,14 +125,47 @@ void Delete(char * filename) {
 }
 
 void OpenTest() {
+	// test a long filename
 	Open("this_is_a_long_file_name");
+
+	// open a lot of files
 	char fname[6] = "file01";
 	for (int i = 0; i < 25; i++) {
 		sprintf(fname, "file%02d", i);
-		printf("%s", fname);
 		Open(fname);
 	}
-	Open("file01");
+	for (int i = 0; i < 20; i++) {
+		sprintf(fname, "file%02d", i);
+		Close(fname);
+	}
+
+	// open same file many times
+	for (int i = 0; i < 5; i++) {
+		Open("test");
+	}
+}
+
+void WriteTest() {
+	char fname1[6] = "myfile";
+	int fd1 = Open(fname1);
+
+	// write exactly 1 blocks
+	char buffer[512];
+	for (int i = 0; i < 512; i++) {
+		buffer[i] = i+'0';
+	}
+	Write(fd1, buffer, 512);
+
+	Close(fd1);
+	fd1 = Open(fname);
+	char result[512];
+	Read(fd1, result, 512);
+
+	// write up all of memory
+	//for (int i = 0; i < 32000; i++) {
+	//	Write(fd1, buffer, 512);
+	//}
+
 }
 
 int main (int argc, char *argv[])
