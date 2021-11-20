@@ -40,9 +40,9 @@ int Open(char *filename_to_open){
 		clnt_perror (clnt, "call failed");
 	}
 	//printf ("In client: Directory name is:%s \nIn client: Name of the file opened is:%s \nIn client: file descriptor returned is:%d\n", open_file_1_arg.user_name, result_1->out_msg.out_msg_val,  result_1->fd);
-	printf("In client: %s\n", result_1->out_msg.out_msg_val);
+	printf("%s\n", result_1->out_msg.out_msg_val);
 	if (result_1->fd > -1) {
-		printf("In client: file descriptor returned is:%d\n", result_1->fd);
+		printf("file descriptor returned is:%d\n", result_1->fd);
 	}
 
 	return result_1->fd;
@@ -87,7 +87,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 }
 
 void Close(int fd){
-	printf("\nIn client: closing fd: %d", fd);
+	printf("\nIn client: closing fd: %d\n", fd);
 	close_output  *result_6;
 	close_input  close_file_1_arg;
 	close_file_1_arg.fd = fd;
@@ -124,6 +124,18 @@ void Delete(char * filename) {
 	printf("%s", result_5->out_msg.out_msg_val);
 }
 
+void OpenTest() {
+	char long_name[32] = "this_is_a_really_long_file_name";
+	Open(long_name);
+	// open a bunch of files
+	char fname[10];
+	memset(fname, ' ', 10);
+	for (int i = 0; i < 25; i++) {
+		sprintf(fname, "file_%02d\0");
+		Open(fname);
+	}
+}
+
 int main (int argc, char *argv[])
 {
 	char *host;
@@ -135,6 +147,9 @@ int main (int argc, char *argv[])
 	host = argv[1];
 	ssnfsprog_1 (host);
 
+	// Test all cases for open
+	OpenTest();
+	/*
 	int fd1 = Open("myfile");
 
 	Write(fd1, "hi this is my file. it only prints half.\n", 20);
@@ -153,6 +168,7 @@ int main (int argc, char *argv[])
 	fd1 = Open("myfile");
 
 	Read(fd1, buffer1, 20);
+	*/
 	/*
 	int fd2 = Open("secret");
 
