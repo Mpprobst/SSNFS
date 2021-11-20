@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define BLOCK_SIZE 512
 #define FILE_SIZE 64	// blocks
@@ -169,13 +170,13 @@ int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
 	int size = lseek(mem, 0, SEEK_END);
 	//printf("Adding block to memory\n");
-	printf("memory used: %.2f of %d\n", ((double)size/MEGABYTES, DISK_SIZE));
+	printf("memory used: %.4f of %d\n", ((double)size/MEGABYTES, DISK_SIZE));
 	if ((size+BLOCK_SIZE)/MEGABYTES > DISK_SIZE) {
 		printf("ERROR: memory is full!\n");
 		return -1;
 	}
 
-	int n_blocks = size / BLOCK_SIZE;
+	int n_blocks = floor(size / BLOCK_SIZE);
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
 	write(mem, blank, BLOCK_SIZE);
@@ -311,7 +312,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		int bytes_read = 0;
 		char buffer[argp->numbytes];
 		memset(buffer, ' ', argp->numbytes);
-		int start = table[argp->fd].fp / BLOCK_SIZE;
+		int start = floor(table[argp->fd].fp / BLOCK_SIZE);
 		int max_read = fi.curr_size - table[argp->fd].fp;
 		if (max_read >= argp->numbytes) {
 			// TODO: if bytes to read > max_read return error that use r is tyring to read too much
@@ -381,7 +382,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 		int curr_block = 0;
 		while (bytes_written < argp->numbytes) {
 			// get correct block from fi based on curr_size
-			curr_block = table[argp->fd].fp / BLOCK_SIZE;
+			curr_block = floor(table[argp->fd].fp / BLOCK_SIZE);
 			if (curr_block >= FILE_SIZE) {
 				success = -1;
 				break;
