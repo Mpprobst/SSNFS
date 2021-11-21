@@ -115,6 +115,7 @@ struct file_info file_exists(char * username, char * filename) {
 	if (exists == -1) {
 		fi.curr_size = -1;
 	}
+	printf("checking for file: %s", filename);
 	return fi;
 }
 
@@ -158,6 +159,7 @@ int get_free_block() {
 		}
 	}
 	close(mem);
+	close(meta);
 	return -1;
 	//return add_block();
 }
@@ -176,7 +178,7 @@ int add_block() {
 	}
 
 	int n_blocks = floor(size / BLOCK_SIZE);
-	printf("memory used: %.4fMB of %dMB\n", ((double)size/MEGABYTES, DISK_SIZE));
+	printf("memory used: %.4fMB of %dMB\n", (size, DISK_SIZE));
 
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
