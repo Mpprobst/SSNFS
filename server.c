@@ -333,8 +333,8 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 				read(mem, &buffer[bytes_read], bytes_to_read);
 			 	bytes_read += bytes_to_read;
 				table[argp->fd].fp += bytes_to_read;
-				//printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
-				//printf("read mem loc %d\n %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
+				printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
+				printf("read mem loc %d\n %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
 			}
 			message_size = bytes_read;
 			message = malloc(message_size);
