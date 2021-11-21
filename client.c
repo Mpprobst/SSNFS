@@ -198,14 +198,17 @@ void WriteTest() {
 	Close(fd3);
 
 	fd3 = Open(fname3);
-	Read(fd3, result3, 41);
+	Read(fd3, result3, 51);
 	printf("+-------------+\n");
 
 	printf("+---TEST 4---+\nwrite between blocks\n");
 	int fd4 = Open("test4");
 	char buffer4[768];
+	char bs[256];
+	memset(bs, 'b', 256);
 	memset(buffer4, 'a', 512);
-	memset(&buffer4[511], 'b', 256);
+	strcat(buffer4, bs, 256);
+	//memset(&buffer4[511], 'b', 256);
 	Write(fd4, buffer4, 768);
 	Close(fd4);
 	fd4 = Open("test4");
