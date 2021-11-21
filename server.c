@@ -329,7 +329,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 					bytes_to_read = bytes_in_block;
 				}
 				int read_loc = fi.blocks[i] * BLOCK_SIZE + table[argp->fd].fp % BLOCK_SIZE;
-				seek(mem, read_loc, SEEK_SET);
+				lseek(mem, read_loc, SEEK_SET);
 				read(mem, &buffer[bytes_read], bytes_to_read);
 			 	bytes_read += bytes_to_read;
 				table[argp->fd].fp += bytes_to_read;
