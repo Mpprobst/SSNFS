@@ -212,6 +212,7 @@ void WriteTest() {
 			buffer4[i] = 'b';
 		}
 	}
+	printf("%s\n", buffer4);
 	//memset(&buffer4[511], 'b', 256);
 	Write(fd4, buffer4, 768);
 	Close(fd4);
