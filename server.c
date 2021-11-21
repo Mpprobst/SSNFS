@@ -154,7 +154,7 @@ int get_free_block() {
 
 	for (int i = 0; i < n_blocks; i++) {
 		if (blocks[i] > 0) {
-			//printf("Reallocating block %d\n", blocks[i]);
+			printf("Reallocating block %d\n", blocks[i]);
 			return blocks[i];
 		}
 	}
@@ -178,7 +178,7 @@ int add_block() {
 	}
 
 	int n_blocks = floor(size / BLOCK_SIZE);
-	printf("memory used: %.4fMB of %dMB\n", (size, DISK_SIZE));
+	printf("Add block: %d. memory used: %.4fMB of %dMB\n", n_blocks+1, size, DISK_SIZE));
 
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
