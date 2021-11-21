@@ -178,7 +178,7 @@ int add_block() {
 	}
 
 	int n_blocks = floor(size / BLOCK_SIZE);
-	printf("Add block: %d. memory used: %dMB of %dMB\n", n_blocks+1, size, DISK_SIZE);
+	printf("Add block: %d. memory used: %.4fMB of %dMB\n", n_blocks+1, (double)size/MEGABYTES, DISK_SIZE);
 
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
@@ -298,7 +298,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	if (argp->fd < TABLE_SIZE) {
 		fi = get_open_file(argp->fd);
 	}
-	printf("fi: %s/%s size=%d\n", fi.username, fi.filename, fi.curr_size);
+	//printf("fi: %s/%s size=%d\n", fi.username, fi.filename, fi.curr_size);
 	// file is open
 	if (fi.curr_size == -1) {
 		message_size = 100;
@@ -372,7 +372,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 	if (argp->fd < TABLE_SIZE) {
 		fi = get_open_file(argp->fd);
 	}
-	printf("file: %s/%s size=%d\n", fi.username, fi.filename, fi.curr_size);
+	//printf("file: %s/%s size=%d\n", fi.username, fi.filename, fi.curr_size);
 	// file is open
 	if (fi.curr_size == -1) {
 		sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
