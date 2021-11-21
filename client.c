@@ -49,6 +49,9 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
+	if (num_bytes_to_write >= strlen(buffer)) {
+		num_bytes_to_write = strlen(buffer);
+	}
 	buffer[num_bytes_to_write-1] = '\0';
 	printf("\nIn client: writing (%dB) to fd:%d\n", num_bytes_to_write, fd);
 	write_output *result_3;
@@ -245,6 +248,7 @@ void ReadTest() {
 
 	printf("+---TEST 0---+\nread invalid and unopened file");
 	char result0[2];
+
 	Read(50, result0, 2);
 	Read(0, result0, 2);
 	printf("+----------+\n");
