@@ -223,6 +223,7 @@ void WriteTest() {
 	Read(fd4, result4c, 768);
 	Close(fd4);
 	fd4 = Open("test4");
+	// READING BETWEEN BLOCKS IS NOT WORKING
 	Read(fd4, result4a, 384);
 	Read(fd4, result4b, 384);
 	printf("+-------------+\n");

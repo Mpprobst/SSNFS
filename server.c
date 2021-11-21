@@ -321,16 +321,18 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			//printf("max bytes to read = %d-%d=%d\nstarting block = %d\n", fi.curr_size, table[argp->fd].fp, max_read, fi.blocks[start]);
 			for (int i = start; (fi.blocks[i] > -1) && (bytes_read < max_read); i++) {
 				int bytes_in_block = BLOCK_SIZE;
-				if (i == start) {
+				//if (i == start) {
 					bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
-				}
+				//}
 				int bytes_to_read = argp->numbytes - bytes_read;
 				if (bytes_to_read > bytes_in_block) {
 					bytes_to_read = bytes_in_block;
 				}
-				int read_loc = lseek(mem, (fi.blocks[i] * BLOCK_SIZE)+table[argp->fd].fp, SEEK_SET);
+				int read_loc = fi.blocks[i] * BLOCK_SIZE + table[argp->fd].fp % BLOCK_SIZE;
+				seek(mem, read_loc, SEEK_SET);
 				read(mem, &buffer[bytes_read], bytes_to_read);
 			 	bytes_read += bytes_to_read;
+				table[argp->fd].fp += bytes_to_read;
 				//printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
 				//printf("read mem loc %d\n %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
 			}
@@ -409,7 +411,6 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 					new_block = free_block;
 					free_block = get_free_block();
 				}
-
 				fi.blocks[curr_block] = new_block;
 				//curr_block = new_block;
 			}
