@@ -217,7 +217,7 @@ void WriteTest() {
 	Close(fd4);
 	fd4 = Open("test4");
 	char result4a[384];
-	cahr result4b[384];
+	char result4b[384];
 	Read(fd4, result4a, 384);
 	Read(fd4, result4b, 384);
 	printf("+-------------+\n");
