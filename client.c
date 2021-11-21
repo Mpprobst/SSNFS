@@ -150,7 +150,7 @@ void WriteTest() {
 	char fname1[7] = "myfile\0";
 	int fd1 = Open(fname1);
 
-	// write exactly 1 blocks
+	printf("+---TEST 1---+\nwrite exactly 1 block\n");
 	char buffer[512];
 	for (int i = 0; i < 512; i++) {
 		buffer[i] = 'a'+i%26;
@@ -161,27 +161,33 @@ void WriteTest() {
 	fd1 = Open(fname1);
 	char result[512];
 	Read(fd1, result, 512);
+	printf("+----------+\n");
 
+	printf("+---TEST 2---+\nwrite file with max size\n");
 	int fd2 = Open("test2");
 	// write a full file (plus extra block)
-	// allows only 512 files. do 1 more to see what happens after
-	for (int i = 0; i < 514; i++) {
+	// allows only 64 blocks. do 1 more to see what happens after
+	for (int i = 0; i < 65; i++) {
 		printf("write %d", i);	// should only allow 64 writes for this file
 		Write(fd2, buffer, 512);
 	}
 
+	printf("+---TEST 3---+\nfill up memory completely\n");
 	// fill up memory completely
 	int fd3 = -1;
-	char fname3[10] = "test00000";
-	for (int i = 0; i < 500; i++) {
-		sprintf(fname3, "test%05d\0", i);
-		printf("fname: %s", fname3);
+	char fname3[8] = "test000\0";
+	// server supports max 512 files. 1 full file exists with annother with 1 block
+	// should get notification of full memory on file 511 (named 510)
+	for (int i = 0; i < 512; i++) {
+		sprintf(fname3, "test%03d\0", i);
+		printf("new file: %s", fname3);
 		fd3 = Open(fname3);
 		for (int j = 0; j < 64; j++) {
 			Write(fd3, buffer, 512);
 		}
 		Close(fd3);
 	}
+	printf("+----------+\n");
 
 }
 
