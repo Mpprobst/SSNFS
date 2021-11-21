@@ -50,10 +50,7 @@ int Open(char *filename_to_open){
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
 	printf("length of buffer: %d\n", strlen(buffer));
-	if (num_bytes_to_write >= strlen(buffer)) {
-		num_bytes_to_write = strlen(buffer);
-	}
-	buffer[num_bytes_to_write-1] = '\0';
+	buffer[strlen(buffer)-1] = '\0';
 	printf("\nIn client: writing (%dB) to fd:%d\n", num_bytes_to_write, fd);
 	write_output *result_3;
 	write_input write_file_1_arg;
