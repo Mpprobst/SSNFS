@@ -286,7 +286,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 }
 
 read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
-	printf("\nIn server: %s attempting to read %dB from file: \n", argp->user_name, argp->numbytes, argp->fd);
+	printf("\nIn server: %s attempting to read %dB from file: %d\n", argp->user_name, argp->numbytes, argp->fd);
 	init_disk();
 	// check if file is open. if not then do nothing and send err msg
 	static read_output result;
@@ -337,8 +337,8 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 				printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
 				printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_read, argp->numbytes);
 			}
-			if (message_size > 0) {
-				buffer[message_size-1] = '\0';
+			if (bytes_read > 0) {
+				buffer[bytes_read-1] = '\0';
 			}
 			message_size = bytes_read;
 			message = malloc(message_size);
