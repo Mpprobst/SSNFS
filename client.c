@@ -207,7 +207,7 @@ void WriteTest() {
 	char bs[256];
 	memset(bs, 'b', 256);
 	memset(buffer4, 'a', 512);
-	strcat(buffer4, bs, 256);
+	strcat(buffer4, bs);
 	//memset(&buffer4[511], 'b', 256);
 	Write(fd4, buffer4, 768);
 	Close(fd4);
