@@ -170,7 +170,7 @@ returns block idx of new block. if memory is full, return -1
 */
 int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
-	int size = lseek(mem, 0, SEEK_END);
+	long size = lseek(mem, 0, SEEK_END);
 	//printf("Adding block to memory\n");
 	if ((size+BLOCK_SIZE)/MEGABYTES > DISK_SIZE) {
 		printf("ERROR: memory is full!\n");
@@ -178,7 +178,7 @@ int add_block() {
 	}
 
 	int n_blocks = floor(size / BLOCK_SIZE);
-	printf("Add block: %d. memory used: %.4fMB of %dMB\n", n_blocks+1, size, DISK_SIZE);
+	printf("Add block: %d. memory used: %dMB of %dMB\n", n_blocks+1, size, DISK_SIZE);
 
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
