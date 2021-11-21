@@ -216,9 +216,10 @@ void WriteTest() {
 	Write(fd4, buffer4, 768);
 	Close(fd4);
 	fd4 = Open("test4");
-	char result4[384];
-	Read(fd4, result4, 384);
-	Read(fd4, result4, 384);
+	char result4a[384];
+	cahr result4b[384];
+	Read(fd4, result4a, 384);
+	Read(fd4, result4b, 384);
 	printf("+-------------+\n");
 
 	printf("+---TEST 5---+\nwrite file with max size\n");
