@@ -329,14 +329,14 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 				if (bytes_to_read > bytes_in_block) {
 					bytes_to_read = bytes_in_block;
 				}
-				printf("reading %dB after file pointer %d\n", bytes_to_read, table[argp->fd].fp);
+				//printf("reading %dB after file pointer %d\n", bytes_to_read, table[argp->fd].fp);
 				int read_loc = fi.blocks[i] * BLOCK_SIZE + table[argp->fd].fp % BLOCK_SIZE;
 				lseek(mem, read_loc, SEEK_SET);
 				read(mem, &buffer[bytes_read], bytes_to_read);
 			 	bytes_read += bytes_to_read;
 				table[argp->fd].fp += bytes_to_read;
-				printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
-				printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_read, argp->numbytes);
+				//printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
+				//printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_read, argp->numbytes);
 			}
 			if (bytes_read > 0) {
 				buffer[bytes_read-1] = '\0';

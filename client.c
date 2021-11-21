@@ -384,7 +384,10 @@ int main (int argc, char *argv[])
 
 	// Test all cases for open
 	//OpenTest();
-	WriteTest();
+	//WriteTest();
+	ReadTest();
+	//CloseTest();
+	//DeleteTest();
 	/*
 	int fd1 = Open("myfile");
 
