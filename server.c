@@ -178,7 +178,7 @@ int add_block() {
 	}
 
 	int n_blocks = floor(size / BLOCK_SIZE);
-	printf("Add block: %d. memory used: %.4fMB of %dMB\n", n_blocks+1, size, DISK_SIZE));
+	printf("Add block: %d. memory used: %.4fMB of %dMB\n", n_blocks+1, size, DISK_SIZE);
 
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
