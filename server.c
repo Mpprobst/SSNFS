@@ -170,13 +170,14 @@ int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
 	int size = lseek(mem, 0, SEEK_END);
 	//printf("Adding block to memory\n");
-	printf("memory used: %.4f of %d\n", ((double)size/MEGABYTES, DISK_SIZE));
 	if ((size+BLOCK_SIZE)/MEGABYTES > DISK_SIZE) {
 		printf("ERROR: memory is full!\n");
 		return -1;
 	}
 
 	int n_blocks = floor(size / BLOCK_SIZE);
+	printf("Current block: %d. memory used: %.4fMB of %dMB\n", n_blocks, ((double)size/MEGABYTES, DISK_SIZE));
+
 	char blank[BLOCK_SIZE];
 	memset(blank, ' ', BLOCK_SIZE);
 	write(mem, blank, BLOCK_SIZE);
