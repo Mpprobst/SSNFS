@@ -49,6 +49,7 @@ int Open(char *filename_to_open){
 }
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
+	printf("length of buffer: %d\n", strlen(buffer));
 	if (num_bytes_to_write >= strlen(buffer)) {
 		num_bytes_to_write = strlen(buffer);
 	}
