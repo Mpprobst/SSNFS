@@ -324,6 +324,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 				//if (i == start) {
 					bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
 				//}
+				printf("start at pointer: %d", table[argp->fd].fp);
 				int bytes_to_read = argp->numbytes - bytes_read;
 				if (bytes_to_read > bytes_in_block) {
 					bytes_to_read = bytes_in_block;
@@ -334,8 +335,9 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			 	bytes_read += bytes_to_read;
 				table[argp->fd].fp += bytes_to_read;
 				printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
-				printf("read mem loc %d\n %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
+				printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_to_read, bytes_read);
 			}
+			buffer[message_size-1] = '\0';
 			message_size = bytes_read;
 			message = malloc(message_size);
 			strcpy(message, buffer);
