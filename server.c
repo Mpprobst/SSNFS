@@ -308,8 +308,8 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		// read the file
 		int mem = open(memory_filename, O_RDONLY);
 		int bytes_read = 0;
-		int nbytes = argp->numbytes+1;
-		char buffer[nbytes];
+		int nbytes = argp->numbytes;
+		char buffer[nbytes+1];	// read as much as client wants, but 1 byte more for a null char
 		memset(buffer, ' ', nbytes);
 		int start = floor(table[argp->fd].fp / BLOCK_SIZE);
 		int max_read = fi.curr_size - table[argp->fd].fp;
@@ -335,7 +335,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 				//printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_read, nbytes);
 			}
 			if (bytes_read > 0) {
-				buffer[bytes_read-1] = '\0';	// fails for reads size 1. consider removing this or just increasing buffer size by 1
+				buffer[nbytes] = '\0';
 			}
 			message_size = bytes_read;
 			message = malloc(message_size);
