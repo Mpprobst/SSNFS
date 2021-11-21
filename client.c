@@ -71,7 +71,7 @@ void Write(int fd, char * buffer, int num_bytes_to_write){
 }
 
 void Read(int fd, char * buffer, int num_bytes_to_read){
-	printf("\nIn client: reading %dB from fd: \n", num_bytes_to_read, fd);
+	printf("\nIn client: reading %dB from fd: %d\n", num_bytes_to_read, fd);
   read_output * result_2;
 	read_input read_file_1_arg;
 	// ask server to read the file I own with a
@@ -84,7 +84,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 		clnt_perror (clnt, "call failed");
 	}
 	//memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
-	printf("File contents:\n%s\n--END--\n", result_2->out_msg.out_msg_val);
+	printf("--FILE CONTENTS--\n%s\n--END--\n", result_2->out_msg.out_msg_val);
 }
 
 void Close(int fd){
@@ -235,7 +235,7 @@ void WriteTest() {
 		printf("write %d", i);	// should only allow 64 writes for this file
 		Write(fd5, buffer, 512);
 	}
-	/*
+
 	printf("+---TEST 6---+\nfill up memory completely\n");
 	// fill up memory completely
 	int fd6 = -1;
@@ -251,7 +251,7 @@ void WriteTest() {
 		}
 		Close(fd6);
 	}
-	printf("+-------------+\n");*/ // temporarily disabled to save time
+	printf("+-------------+\n"); // temporarily disabled to save time
 }
 
 void ReadTest() {
@@ -313,7 +313,7 @@ void ReadTest() {
 	int fd5a = Open("test5");
 	int fd5b = Open("test5");
 	Write(fd5a, "This will be deleted", 20);
-	Delete(fd5a);
+	Delete("test5");
 	char result5[20];
 	Read(fd5b, result5, 20);
 	printf("+-------------+\n");

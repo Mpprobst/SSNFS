@@ -313,7 +313,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 		memset(buffer, ' ', nbytes);
 		int start = floor(table[argp->fd].fp / BLOCK_SIZE);
 		int max_read = fi.curr_size - table[argp->fd].fp;
-		printf("file size: %d. fp: %d. max read: %d\n", fi.curr_size, table[argp->fd].fp, max_read);
+		//printf("file size: %d. fp: %d. max read: %d\n", fi.curr_size, table[argp->fd].fp, max_read);
 		if (max_read >= nbytes) {
 			max_read = nbytes;
 			// TODO: if bytes to read > max_read return error that use r is tyring to read too much
