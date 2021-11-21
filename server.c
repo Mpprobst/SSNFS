@@ -115,7 +115,6 @@ struct file_info file_exists(char * username, char * filename) {
 	if (exists == -1) {
 		fi.curr_size = -1;
 	}
-	printf("checking for file: %s", filename);
 	return fi;
 }
 
@@ -414,23 +413,26 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				fi.blocks[curr_block] = new_block;
 				//curr_block = new_block;
 			}
-			// if new block is still -1, we have run out of space
-			if (curr_block == -1) {
+
+			if (curr_block > -1) {
+				printf("writing %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
+				// write to blocks 512 bytes at a time
+				int mem_loc = lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
+				char buf[bytes_to_write];
+				memcpy(buf, &argp->buffer.buffer_val[bytes_written], bytes_to_write);
+				//printf("wrote to addr: %d: %s\n", mem_loc, buf);
+				write(mem, buf, bytes_to_write);
+				bytes_written += bytes_to_write;
+				table[argp->fd].fp += bytes_written;
+				fi.curr_size += bytes_written;
+			}
+			else {
+				// if new block is still -1, we have run out of space
 				printf("ERROR: Write past EOF\n");
 				strcpy(message,"ERROR: Write past EOF. Please delete files to free up space.\n");
 				int success = -1;
 				break;
 			}
-			printf("writing %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
-			// write to blocks 512 bytes at a time
-			int mem_loc = lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
-			char buf[bytes_to_write];
-			memcpy(buf, &argp->buffer.buffer_val[bytes_written], bytes_to_write);
-			//printf("wrote to addr: %d: %s\n", mem_loc, buf);
-			write(mem, buf, bytes_to_write);
-			bytes_written += bytes_to_write;
-			table[argp->fd].fp += bytes_written;
-			fi.curr_size += bytes_written;
 		}
 		close(mem);
 		if (success == 1) {
