@@ -263,7 +263,7 @@ void ReadTest() {
 	printf("+---TEST 0---+\nread invalid and unopened file");
 	char result0[2];
 
-	Read(50, result0, 2);
+	Read(50, result0, 2);	// returned success.
 	Read(0, result0, 2);
 	printf("+-------------+\n");
 
@@ -292,7 +292,7 @@ void ReadTest() {
 	Write(fd3, buffer, 512);
 	Write(fd3, buffer, 512);
 	Close(fd3);
-	fd3 = Open(fd3);
+	fd3 = Open("longread");
 	char result3[1024];
 	Read(fd3, result3, 1024);
 	printf("+-------------+\n");

@@ -302,30 +302,25 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	if (fi.curr_size == -1) {
 		message_size = 100;
 		message = "ERROR: file descriptor is either invalid or not in use.\n";
-		//message = malloc(message_size);
-		//memset(message, ' ', message_size);
-		//strcpy(message, "ERROR: file with that descriptor is not open");
-		//sprintf(message, "ERROR: file with descriptor %d is not open\n", argp->fd);
 		printf("ERROR: file is not open.\n", argp->fd);
 	}
 	else {
 		// read the file
 		int mem = open(memory_filename, O_RDONLY);
 		int bytes_read = 0;
-		char buffer[argp->numbytes];
-		memset(buffer, ' ', argp->numbytes);
+		int nbytes = argp->numbytes+1;
+		char buffer[nbytes];
+		memset(buffer, ' ', nbytes);
 		int start = floor(table[argp->fd].fp / BLOCK_SIZE);
 		int max_read = fi.curr_size - table[argp->fd].fp;
-		if (max_read >= argp->numbytes) {
-			max_read = argp->numbytes;
+		if (max_read >= nbytes) {
+			max_read = nbytes;
 			// TODO: if bytes to read > max_read return error that use r is tyring to read too much
 			//printf("max bytes to read = %d-%d=%d\nstarting block = %d\n", fi.curr_size, table[argp->fd].fp, max_read, fi.blocks[start]);
 			for (int i = start; (fi.blocks[i] > -1) && (bytes_read < max_read); i++) {
 				int bytes_in_block = BLOCK_SIZE;
-				//if (i == start) {
-					bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
-				//}
-				int bytes_to_read = argp->numbytes - bytes_read;
+				bytes_in_block -= table[argp->fd].fp % BLOCK_SIZE;
+				int bytes_to_read = nbytes - bytes_read;
 				if (bytes_to_read > bytes_in_block) {
 					bytes_to_read = bytes_in_block;
 				}
@@ -336,10 +331,10 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			 	bytes_read += bytes_to_read;
 				table[argp->fd].fp += bytes_to_read;
 				//printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
-				//printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_read, argp->numbytes);
+				//printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_read, nbytes);
 			}
 			if (bytes_read > 0) {
-				buffer[bytes_read-1] = '\0';
+				buffer[bytes_read-1] = '\0';	// fails for reads size 1. consider removing this or just increasing buffer size by 1
 			}
 			message_size = bytes_read;
 			message = malloc(message_size);
