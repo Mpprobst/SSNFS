@@ -172,7 +172,7 @@ int add_block() {
 	int mem = open(memory_filename, O_RDONLY);
 	long size = lseek(mem, 0, SEEK_END);
 	//printf("Adding block to memory\n");
-	if ((size+BLOCK_SIZE)/MEGABYTES > DISK_SIZE) {
+	if ((double)(size+BLOCK_SIZE)/MEGABYTES > DISK_SIZE) {
 		printf("ERROR: memory is full!\n");
 		return -1;
 	}
