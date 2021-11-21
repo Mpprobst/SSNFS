@@ -313,6 +313,7 @@ void ReadTest() {
 	int fd5a = Open("test5");
 	int fd5b = Open("test5");
 	Write(fd5a, "This will be deleted", 20);
+	printf("now deleting that file\n");
 	Delete("test5");
 	char result5[20];
 	Read(fd5b, result5, 20);
