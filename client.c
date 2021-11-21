@@ -205,8 +205,8 @@ void WriteTest() {
 	int fd4 = Open("test4");
 	char buffer4[768];
 	memset(buffer4, 'a', 512);
-	printf("buffer[511]=%c\n", buffer4[511]);
-	memset(buffer4[511], 'b', 256);
+	printf("buffer[512]=%c\n", buffer4[512]);
+	memset(&buffer4[511], 'b', 256);
 	printf("%s\n", buffer4);
 	Write(fd4, buffer4, 768);
 	Close(fd4);
