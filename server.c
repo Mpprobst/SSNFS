@@ -344,7 +344,6 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			message_size = bytes_read;
 			message = malloc(message_size);
 			strcpy(message, buffer);
-			table[argp->fd].fp+=bytes_read;
 			close(mem);
 			printf("File read successful\n");
 		}
