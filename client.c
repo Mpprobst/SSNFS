@@ -186,7 +186,7 @@ void WriteTest() {
 	Close(fd3);
 	fd3 = Open(fname3);
 	char result3[100];
-	Read(fd3, result, 25);
+	Read(fd3, result3, 25);
 
 	Close(fd3);
 	fd3 = Open(fname3);
@@ -245,8 +245,8 @@ void ReadTest() {
 
 	printf("+---TEST 0---+\nread invalid and unopened file");
 	char result0[2];
-	Read(50, result, 2);
-	Read(0, result, 2);
+	Read(50, result0, 2);
+	Read(0, result0, 2);
 	printf("+----------+\n");
 
 	printf("+---TEST 1---+\nread exactly 1 byte and successive reads\n");
@@ -255,9 +255,9 @@ void ReadTest() {
 	Close(fd1);
 	fd1 = Open("file1\0");
 	char result1[1];
-	Read(fd1, result, 1);
-	Read(fd1, result, 1);
-	Read(fd1, result, 1);
+	Read(fd1, result1, 1);
+	Read(fd1, result1, 1);
+	Read(fd1, result1, 1);
 	Close(fd1);
 	printf("+----------+\n");
 
@@ -265,7 +265,7 @@ void ReadTest() {
 	int fd2 = Open("eoftest");
 	Write(fd2, "abc", 3);
 	char result2[10];
-	Read(fd2, result, 10);
+	Read(fd2, result2, 10);
 	Close(fd2);
 	printf("+----------+\n");
 
@@ -277,7 +277,7 @@ void ReadTest() {
 	fd3 = Open(fd3);
 	char result3[1024];
 	Read(fd3, result3, 1024);
-	printf("+----------+\n")
+	printf("+----------+\n");
 
 	printf("+---TEST 4---+\nread same file that has many file descriptors\n");
 	int fd4[5];
@@ -333,7 +333,7 @@ void DeleteTest() {
 	printf("+---TEST 1---+\ndelete file, create new one with same name\n");
 	char fname1[12] = "deletetest1\0";
 	int fd1 = Open(fname1);
-	Write(fd1, "this will be deleted");
+	Write(fd1, "this will be deleted", 10);
 	Delete(fname1);
 	fd1 = Open(fname1);
 	char result1[10];
