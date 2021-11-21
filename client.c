@@ -50,7 +50,7 @@ int Open(char *filename_to_open){
 
 void Write(int fd, char * buffer, int num_bytes_to_write){
 	buffer[num_bytes_to_write-1] = '\0';
-	printf("\nIn client: writing \"%s\" (%dB) to fd:%d\n", buffer, num_bytes_to_write, fd);
+	printf("\nIn client: writing (%dB) to fd:%d\n", num_bytes_to_write, fd);
 	write_output *result_3;
 	write_input write_file_1_arg;
 	char message[num_bytes_to_write];
@@ -126,10 +126,12 @@ void Delete(char * filename) {
 }
 
 void OpenTest() {
-	// test a long filename
+	printf("+---TEST 0---+\ntest a long filename\n");
 	Open("this_is_a_long_file_name");
+	printf("+----------+\n");
 
 	// open a lot of files
+	printf("+---TEST 1---+\nopen more files than file table can hold\n");
 	char fname[6] = "file01";
 	for (int i = 0; i < 25; i++) {
 		sprintf(fname, "file%02d", i);
@@ -139,55 +141,215 @@ void OpenTest() {
 		sprintf(fname, "file%02d", i);
 		Close(i);
 	}
+	printf("+----------+\n");
 
 	// open same file many times
+	printf("+---TEST 2---+\nopen same file many times\n");
 	for (int i = 0; i < 5; i++) {
 		Open("test");
 	}
 }
 
 void WriteTest() {
-	char fname1[7] = "myfile\0";
-	int fd1 = Open(fname1);
-
-	printf("+---TEST 1---+\nwrite exactly 1 block\n");
 	char buffer[512];
 	for (int i = 0; i < 512; i++) {
 		buffer[i] = 'a'+i%26;
 	}
-	Write(fd1, buffer, 512);
 
-	Close(fd1);
-	fd1 = Open(fname1);
-	char result[512];
-	Read(fd1, result, 512);
+	printf("+---TEST 0---+\nwrite to unopened file\n");
+	Write(2, "This file is not open\n", 10);
 	printf("+----------+\n");
 
-	printf("+---TEST 2---+\nwrite file with max size\n");
-	int fd2 = Open("test2");
+	printf("+---TEST 1---+\nwrite 0 bytes\n");
+	int fd1 = Open("emptyfile");
+	Write(fd1, "this will not be written", 0);
+	Close(fd1);
+
+	fd1 = Open("emptyfile");
+	char result1[0];
+	memset(result1, ' ', 0);
+	Read(fd1, result1, 0);
+	//Close(fd1);
+	printf("+----------+\n");
+
+	printf("+---TEST 2---+\nwrite more bytes than buffer is\n");
+	int fd2 = Open("overwrite");
+	Write(fd2, "a", 10);
+	//Close(fd2);
+	printf("+----------+\n");
+
+	printf("+---TEST 3---+\nwrite over existing file\n");
+	char fname3[7] = "myfile\0";
+	int fd3 = Open(fname3);
+	Write(fd3, "This will be overwritten\n", 25);
+
+	Close(fd3);
+	fd3 = Open(fname3);
+	char result3[100];
+	Read(fd3, result, 25);
+
+	Close(fd3);
+	fd3 = Open(fname3);
+	Write(fd3, "THE OLD FILE CONTENTS WERE OVERRIDDEN SUCCESSFULLY\n", 41);
+	Close(fd3);
+
+	fd3 = Open(fname3);
+	Read(fd3, result3, 41);
+	printf("+----------+\n");
+
+	printf("+---TEST 4---+\nwrite between blocks\n");
+	int fd4 = Open("test4");
+	char buffer4[768];
+	memset(buffer4, 'a', 512);
+	memset(buffer4[511], 'b', 256);
+	Write(fd4, buffer4, 768);
+	Close(fd4);
+	fd4 = Open("test4");
+	char result4[384];
+	Read(fd4, result4, 384);
+	Read(fd4, result4, 384);
+	printf("+----------+\n");
+
+	printf("+---TEST 5---+\nwrite file with max size\n");
+	int fd5 = Open("test5");
 	// write a full file (plus extra block)
 	// allows only 64 blocks. do 1 more to see what happens after
 	for (int i = 0; i < 65; i++) {
 		printf("write %d", i);	// should only allow 64 writes for this file
-		Write(fd2, buffer, 512);
+		Write(fd5, buffer, 512);
 	}
-
-	printf("+---TEST 3---+\nfill up memory completely\n");
+	/*
+	printf("+---TEST 6---+\nfill up memory completely\n");
 	// fill up memory completely
-	int fd3 = -1;
-	char fname3[8] = "test000\0";
+	int fd6 = -1;
+	char fname6[8] = "test000\0";
 	// server supports max 512 files. 1 full file exists with annother with 1 block
 	// should get notification of full memory on file 511 (named 510)
 	for (int i = 0; i < 512; i++) {
-		sprintf(fname3, "test%03d\0", i);
-		printf("new file: %s", fname3);
-		fd3 = Open(fname3);
+		sprintf(fname6, "test%03d\0", i);
+		printf("new file: %s", fname6);
+		fd6 = Open(fname6);
 		for (int j = 0; j < 64; j++) {
-			Write(fd3, buffer, 512);
+			Write(fd6, buffer, 512);
 		}
-		Close(fd3);
+		Close(fd6);
+	}
+	printf("+----------+\n");*/ // temporarily disabled to save time
+}
+
+void ReadTest() {
+	char buffer[512];
+	for (int i = 0; i < 512; i++) {
+		buffer[i] = 'a'+i%26;
+	}
+
+	printf("+---TEST 0---+\nread invalid and unopened file");
+	char result0[2];
+	Read(50, result, 2);
+	Read(0, result, 2);
+	printf("+----------+\n");
+
+	printf("+---TEST 1---+\nread exactly 1 byte and successive reads\n");
+	int fd1 = Open("file1\0");
+	Write(fd1, "123", 1);
+	Close(fd1);
+	fd1 = Open("file1\0");
+	char result1[1];
+	Read(fd1, result, 1);
+	Read(fd1, result, 1);
+	Read(fd1, result, 1);
+	Close(fd1);
+	printf("+----------+\n");
+
+	printf("+---TEST 2---+\nread more than is in a file\n");
+	int fd2 = Open("eoftest");
+	Write(fd2, "abc", 3);
+	char result2[10];
+	Read(fd2, result, 10);
+	Close(fd2);
+	printf("+----------+\n");
+
+	printf("+---TEST 3---+\nread over two blocks\n");
+	int fd3 = Open("longread");
+	Write(fd3, buffer, 512);
+	Write(fd3, buffer, 512);
+	Close(fd3);
+	fd3 = Open(fd3);
+	char result3[1024];
+	Read(fd3, result3, 1024);
+	printf("+----------+\n")
+
+	printf("+---TEST 4---+\nread same file that has many file descriptors\n");
+	int fd4[5];
+	for (int i = 0; i < 5; i++) {
+		fd4[i] = Open("test4");
+	}
+	Write(fd4[0], "This should be the same.", 24);
+	for (int i = 0; i < 5; i++) {
+		char result4[24];
+		Read(fd4[i], result4, 24);	// fd4[0] should give error
 	}
 	printf("+----------+\n");
+
+	printf("+---TEST 5---+\ntry to read deleted file\n");
+	int fd5a = Open("test5");
+	int fd5b = Open("test5");
+	Write(fd5a, "This will be deleted", 20);
+	Delete(fd5a);
+	char result5[20];
+	Read(fd5b, result5, 20);
+	printf("+----------+\n");
+}
+
+void CloseTest() {
+	printf("+---TEST 0---+\nclose unopened file\n");
+	Close(0);
+	printf("+----------+\n");
+
+	printf("+---TEST 1---+\nclose file, reopen and read it\n");
+	int fd1 = Open("readtest1");
+	Write(fd1, "This should be here when I read again.", 38);
+	Close(fd1);
+	fd1 = Open("readtest1");
+	char result1[38];
+	Read(fd1, result1, 38);
+	printf("+----------+\n");
+
+	printf("+---TEST 2---+\nopen file multiple times, close one and read it using other descriptors\n");
+	int fd2a = Open("readtest2");
+	int fd2b = Open("readtest2");
+	Write(fd2a, "hello", 5);
+	Close(fd2a);
+	char result2[5];
+	Read(fd2b, result2, 5);
+	printf("+----------+\n");
+}
+
+void DeleteTest() {
+	printf("+---TEST 0---+\ndelete file that does not exist\n");
+	Delete("dne");
+	printf("+----------+\n");
+
+	printf("+---TEST 1---+\ndelete file, create new one with same name\n");
+	char fname1[12] = "deletetest1\0";
+	int fd1 = Open(fname1);
+	Write(fd1, "this will be deleted");
+	Delete(fname1);
+	fd1 = Open(fname1);
+	char result1[10];
+	Read(fd1, result1, 10); 	// should give eof warning
+	printf("+----------+\n");
+
+	printf("+---TEST 2---+\ndelete file that is open in multiple descriptors\n");
+	char fname2[12] = "deletetest2\0";
+	int fd2a = Open(fname2);
+	int fd2b = Open(fname2);
+	Write(fd2a, "testing testing 123", 19);
+	Delete(fname2);
+	char result2[19];
+	Read(fd2b, result2, 19);	// should give file not exist error
+	printf("+----------+\n");
+
 
 }
 

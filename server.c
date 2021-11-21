@@ -414,7 +414,7 @@ write_output * write_file_1_svc(write_input *argp, struct svc_req *rqstp)
 				//curr_block = new_block;
 			}
 
-			if (curr_block > -1) {
+			if (fi.blocks[curr_block] > -1) {
 				printf("writing %d to fi.blocks[%d] = %d\n", bytes_to_write, curr_block, fi.blocks[curr_block]);
 				// write to blocks 512 bytes at a time
 				int mem_loc = lseek(mem, fi.blocks[curr_block]*BLOCK_SIZE+idx, SEEK_SET);
