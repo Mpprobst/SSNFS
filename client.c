@@ -436,6 +436,7 @@ int main (int argc, char *argv[]) {
 		printf("Please enter request: ");
 		char request[10];
 		memset(request, ' ', 10);
+		gets(request);
 		if (strcmp(request,"open") == 0) {
 			if (argc < 4) {
 				printf ("usage: %s <server_host> open <filename> \n", argv[0]);
