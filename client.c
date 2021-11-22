@@ -431,67 +431,85 @@ int main (int argc, char *argv[]) {
 	}
 	host = argv[1];
 	ssnfsprog_1 (host);
-
-	char * request = argv[2];
-	if (strcmp(request,"open") == 0) {
-		if (argc < 4) {
-			printf ("usage: %s <server_host> open <filename> \n", argv[0]);
-			exit(1);
+	int done = -1;
+	while (done == -1) {
+		printf("Please enter request: ");
+		char request[10];
+		memset(request, ' ', 10);
+		if (strcmp(request,"open") == 0) {
+			if (argc < 4) {
+				printf ("usage: %s <server_host> open <filename> \n", argv[0]);
+				exit(1);
+			}
+			int fd = Open(argv[3]);
 		}
-		int fd = Open(argv[3]);
-	}
-	else if (strcmp(request, "close") == 0) {
-		if (argc < 4) {
-			printf ("usage: %s <server_host> close <file descriptor> \n", argv[0]);
-			exit(1);
+		else if (strcmp(request, "close") == 0) {
+			if (argc < 4) {
+				printf ("usage: %s <server_host> close <file descriptor> \n", argv[0]);
+				exit(1);
+			}
+			Close(atoi(argv[3]));
 		}
-		Close(atoi(argv[3]));
-	}
-	else if (strcmp(request, "write") == 0) {
-		if (argc < 6) {
-			printf ("usage: %s <server_host> write <file descriptor> <buffer> <bytes to write> \n", argv[0]);
-			exit(1);
+		else if (strcmp(request, "write") == 0) {
+			if (argc < 5) {
+				printf ("usage: %s <server_host> write <file descriptor> \n", argv[0]);
+				exit(1);
+			}
+			char * s;
+			s_len = 0;
+			int ch;
+			printf("Enter string, press return to submit: ");
+			// read input
+			while ((ch = getchar()) != EOF || s_len >= argv[4]) {
+    		if (ch == '\n') {
+					s_len++;
+        	s = realloc(s, (s_len * sizeof(char)) + sizeof(char));
+					s[s_len-1] = ch;
+				}
+			}
+			printf("input: %s", s);
+			Write(atoi(argv[3]), s, s_len);
 		}
-		Write(atoi(argv[3]), argv[4], atoi(argv[5]));
-	}
-	else if (strcmp(request, "read") == 0) {
-		if (argc < 5) {
-			printf ("usage: %s <server_host> read <file descriptor> <bytes to read> \n", argv[0]);
-			exit(1);
+		else if (strcmp(request, "read") == 0) {
+			if (argc < 5) {
+				printf ("usage: %s <server_host> read <file descriptor> <bytes to read> \n", argv[0]);
+				exit(1);
+			}
+			int nbytes = atoi(argv[5]);
+			char buffer[atoi(argv[5])];
+			Read(atoi(argv[3]), buffer, atoi(argv[5]));
 		}
-		char buffer[atoi(argv[5])];
-		Read(atoi(argv[3]), buffer, atoi(argv[5]));
-	}
-	else if (strcmp(request, "list") == 0) {
-		List();
-	}
-	else if (strcmp(request, "delete") == 0) {
-		if (argc < 4) {
-			printf ("usage: %s <server_host> delete <filename> \n", argv[0]);
-			exit(1);
+		else if (strcmp(request, "list") == 0) {
+			List();
 		}
-		Delete(argv[3]);
-	}
-	else if (strcmp(request, "opentest") == 0) {
-		OpenTest();
-	}
-	else if (strcmp(request, "closetest") == 0) {
-		CloseTest();
-	}
-	else if (strcmp(request, "writetest") == 0) {
-		WriteTest();
-	}
-	else if (strcmp(request, "readtest") == 0) {
-		ReadTest();
-	}
-	else if (strcmp(request, "listtest") == 0) {
-		ListTest();
-	}
-	else if (strcmp(request, "deletetest") == 0) {
-		DeleteTest();
-	}
-	else {
-		printf("ERROR: Invalid request type\n");
+		else if (strcmp(request, "delete") == 0) {
+			if (argc < 4) {
+				printf ("usage: %s <server_host> delete <filename> \n", argv[0]);
+				exit(1);
+			}
+			Delete(argv[3]);
+		}
+		else if (strcmp(request, "opentest") == 0) {
+			OpenTest();
+		}
+		else if (strcmp(request, "closetest") == 0) {
+			CloseTest();
+		}
+		else if (strcmp(request, "writetest") == 0) {
+			WriteTest();
+		}
+		else if (strcmp(request, "readtest") == 0) {
+			ReadTest();
+		}
+		else if (strcmp(request, "listtest") == 0) {
+			ListTest();
+		}
+		else if (strcmp(request, "deletetest") == 0) {
+			DeleteTest();
+		}
+		else {
+			printf("ERROR: Invalid request type\n");
+		}
 	}
 
 	// Test suites. Recommended to do only one at a time

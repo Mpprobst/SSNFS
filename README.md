@@ -3,6 +3,8 @@ This is a solution to HW4 for CS570 instructed by Dr. Manivannan at the Universi
 The goal of this project is to implement a simple stateful network file server - that is the server will host files created by clients.
 ## USAGE
 Compiling the server and client can be done using the makefile. Simply enter the command `make`.
+Because the files are saved, between sessions, to clear memory you must delete the memory and metadata file. Do so with the `make clean` command.
+
 Next, run the server with command `./server`
 
 On another terminal, connect to the server with a client using command `./client <hostname> <request>` where the hostname is the name of the host running the server, and the request is one of the following commands:
