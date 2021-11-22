@@ -456,7 +456,7 @@ int main (int argc, char *argv[]) {
 				exit(1);
 			}
 			char * s;
-			s_len = 0;
+			int s_len = 0;
 			int ch;
 			printf("Enter string, press return to submit: ");
 			// read input
