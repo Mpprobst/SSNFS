@@ -280,7 +280,7 @@ void ReadTest() {
 	char result1[1];
 	Read(fd1, result1, 1);
 	Read(fd1, result1, 1);
-	Read(fd1, result1, 1);
+	Read(fd1, result1, 1);		// reading last available byte is not working
 	Close(fd1);
 	printf("+-------------+\n");
 
@@ -390,8 +390,8 @@ int main (int argc, char *argv[])
 	// Test all cases for open
 	//OpenTest();
 	//WriteTest();
-	ReadTest();
-	//CloseTest();
+	//ReadTest();
+	CloseTest();
 	//DeleteTest();
 	/*
 	int fd1 = Open("myfile");
