@@ -397,7 +397,7 @@ void ListTest() {
 
 	printf("+---TEST 3---+\ndelete files then list\n");
 	for (int i = 0; i < 20; i++) {
-		sprintf(fname, "file%02d", i);
+		sprintf(fname2, "file%02d", i);
 		Delete(fname2);
 	}
 	List();
