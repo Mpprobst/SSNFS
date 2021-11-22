@@ -39,3 +39,6 @@ These are some decisions I made that were not specified by the assignment handou
 - when a file is deleted, it frees the blocks of memory which it had been holding on to. those blocks which are freed have their data cleared and remain so until some other file requires it. that being said, blocks of memory held by a file do not have to be sequential.
 - filename can be a maximum of 25 characters long.
 - username can be a maximum of 15 characters long.
+
+## LIMITATIONS
+- the client assumes input will always be correct. it assumes that when an operation requires a file descriptor, that an integer will be entered and not some character or other variable type. if incorrect variable types are given, the request will likely not work as intended, but undesirable side effects may occur as these cases are not handled.
