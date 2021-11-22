@@ -455,8 +455,8 @@ int main (int argc, char *argv[]) {
 		Write(atoi(argv[3]), argv[4], atoi(argv[5]));
 	}
 	else if (strcmp(request, "read") == 0) {
-		if (argc < 6) {
-			printf ("usage: %s <server_host> read <file descriptor> <buffer> <bytes to read> \n", argv[0]);
+		if (argc < 5) {
+			printf ("usage: %s <server_host> read <file descriptor> <bytes to read> \n", argv[0]);
 			exit(1);
 		}
 		char buffer[atoi(argv[5])];
