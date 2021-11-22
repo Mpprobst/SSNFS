@@ -133,7 +133,7 @@ void Delete(char * filename) {
 void OpenTest() {
 	printf("+---TEST 0---+\ntest a long filename\n");
 	Open("this_is_a_long_file_name");
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	// open a lot of files
 	printf("+---TEST 1---+\nopen more files than file table can hold\n");
@@ -146,7 +146,7 @@ void OpenTest() {
 		sprintf(fname, "file%02d", i);
 		Close(i);
 	}
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	// open same file many times
 	printf("+---TEST 2---+\nopen same file many times\n");
@@ -163,7 +163,7 @@ void WriteTest() {
 
 	printf("+---TEST 0---+\nwrite to unopened file\n");
 	Write(2, "This file is not open\n", 10);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 1---+\nwrite 0 bytes\n");
 	int fd1 = Open("emptyfile");
@@ -175,7 +175,7 @@ void WriteTest() {
 	memset(result1, ' ', 0);
 	Read(fd1, result1, 0);
 	//Close(fd1);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 2---+\nwrite more bytes than buffer is long\n");
 	int fd2 = Open("overwrite");
@@ -184,7 +184,7 @@ void WriteTest() {
 	fd2 = Open("overwrite");
 	char result2[10];
 	Read(fd2, result2, 10);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 3---+\nwrite over existing file\n");
 	char fname3[7] = "myfile\0";
@@ -203,7 +203,7 @@ void WriteTest() {
 
 	fd3 = Open(fname3);
 	Read(fd3, result3, 51);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 4---+\nwrite between blocks\n");
 	int fd4 = Open("test4");
@@ -230,7 +230,7 @@ void WriteTest() {
 	// READING BETWEEN BLOCKS IS NOT WORKING
 	Read(fd4, result4a, 384);
 	Read(fd4, result4b, 384);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 5---+\nwrite file with max size\n");
 	int fd5 = Open("test5");
@@ -256,7 +256,7 @@ void WriteTest() {
 		}
 		Close(fd6);
 	}
-	printf("\n+-------------+\n"); // temporarily disabled to save time
+	printf("+-------------+\n\n"); // temporarily disabled to save time
 }
 
 void ReadTest() {
@@ -270,7 +270,7 @@ void ReadTest() {
 
 	Read(50, result0, 2);	// returned success.
 	Read(0, result0, 2);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 1---+\nread exactly 1 byte and successive reads\n");
 	int fd1 = Open("file1\0");
@@ -282,7 +282,7 @@ void ReadTest() {
 	Read(fd1, result1, 1);
 	Read(fd1, result1, 1);		// reading last available byte is not working
 	Close(fd1);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 2---+\nread more than is in a file\n");
 	int fd2 = Open("eoftest");
@@ -290,7 +290,7 @@ void ReadTest() {
 	char result2[10];
 	Read(fd2, result2, 10);
 	Close(fd2);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 3---+\nread over two blocks\n");
 	int fd3 = Open("longread");
@@ -300,7 +300,7 @@ void ReadTest() {
 	fd3 = Open("longread");
 	char result3[1024];
 	Read(fd3, result3, 1024);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 4---+\nread same file that has many file descriptors\n");
 	int fd4[5];
@@ -312,7 +312,7 @@ void ReadTest() {
 		char result4[24];
 		Read(fd4[i], result4, 24);	// fd4[0] should give error
 	}
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 5---+\ntry to read deleted file\n");
 	int fd5a = Open("test5");
@@ -321,13 +321,13 @@ void ReadTest() {
 	Delete("test5");
 	char result5[20];
 	Read(fd5b, result5, 20);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 }
 
 void CloseTest() {
 	printf("+---TEST 0---+\nclose unopened file\n");
 	Close(0);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 1---+\nclose file, reopen and read it\n");
 	int fd1 = Open("readtest1");
@@ -336,7 +336,7 @@ void CloseTest() {
 	fd1 = Open("readtest1");
 	char result1[38];
 	Read(fd1, result1, 38);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 2---+\nopen file multiple times, close one and read it using other descriptors\n");
 	int fd2a = Open("readtest2");
@@ -345,13 +345,13 @@ void CloseTest() {
 	Close(fd2a);
 	char result2[5];
 	Read(fd2b, result2, 5);
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 }
 
 void DeleteTest() {
 	printf("+---TEST 0---+\ndelete file that does not exist\n");
 	Delete("dne");
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 1---+\ndelete file, create new one with same name\n");
 	char fname1[12] = "deletetest1\0";
@@ -361,7 +361,7 @@ void DeleteTest() {
 	fd1 = Open(fname1);
 	char result1[10];
 	Read(fd1, result1, 10); 	// should give eof warning
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 	printf("+---TEST 2---+\ndelete file that is open in multiple descriptors\n");
 	char fname2[12] = "deletetest2\0";
@@ -371,7 +371,7 @@ void DeleteTest() {
 	Delete(fname2);
 	char result2[19];
 	Read(fd2b, result2, 19);	// should give file not exist error
-	printf("\n+-------------+\n");
+	printf("+-------------+\n\n");
 
 
 }
@@ -388,11 +388,11 @@ int main (int argc, char *argv[])
 	ssnfsprog_1 (host);
 
 	// Test all cases for open
-	//OpenTest();
+	OpenTest();
 	//WriteTest();
 	//ReadTest();
 	//CloseTest();
-	DeleteTest();
+	//DeleteTest();
 	/*
 	int fd1 = Open("myfile");
 
