@@ -274,7 +274,7 @@ void ReadTest() {
 
 	printf("+---TEST 1---+\nread exactly 1 byte and successive reads\n");
 	int fd1 = Open("file1\0");
-	Write(fd1, "123", 1);
+	Write(fd1, "123", 3);
 	Close(fd1);
 	fd1 = Open("file1\0");
 	char result1[1];
@@ -318,7 +318,6 @@ void ReadTest() {
 	int fd5a = Open("test5");
 	int fd5b = Open("test5");
 	Write(fd5a, "This will be deleted", 20);
-	printf("now deleting that file\n");
 	Delete("test5");
 	char result5[20];
 	Read(fd5b, result5, 20);
