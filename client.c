@@ -83,7 +83,7 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 	if (result_2 == (read_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	if (result_2.success == 1) {
+	if (result_2->success == 1) {
 	//memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
 		printf("--FILE CONTENTS--\n%s\n--END--\n", result_2->out_msg.out_msg_val);
 	}
