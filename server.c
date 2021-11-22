@@ -512,7 +512,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	close(meta);
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = message_size;
-	result.out_msg.out_msg_val = (char *)malloc(result.out_msg.out_msg_len);
+	result.out_msg.out_msg_val = (char *)malloc(result.out_msg.out_msg_len); // first 6 bytes are bad
 	strcpy(result.out_msg.out_msg_val, files);
 	return &result;
 }

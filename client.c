@@ -322,6 +322,23 @@ void ReadTest() {
 	char result5[20];
 	Read(fd5b, result5, 20);
 	printf("+-------------+\n\n");
+
+	printf("+---TEST 6---+\nread file after it gets a new fd\n");
+	int fd6a = Open("target");
+
+	char long_str[1000];
+	memset(long_str, 'a', 1000);
+	Write(fd6a, long_str, 1000);
+	char buffer6[1000];
+
+	int fd6b = Open("dummy1");
+	int fd6c = Open("dummy2");
+	List();
+
+	Close(fd6a);	// get new fd
+	fd6a = Open("target");
+	Read(fd6a, buffer6, 1000);
+	printf("+-------------+\n\n");
 }
 
 void CloseTest() {
@@ -383,6 +400,7 @@ void ListTest() {
 	int fd1 = Open("listtest1");
 	List();
 	Close(fd1);
+	Delete("listtest1");
 	printf("+-------------+\n\n");
 
 	printf("+---TEST 2---+\nlist when user has a lot of files\n");
@@ -405,49 +423,6 @@ void ListTest() {
 
 }
 
-void SimpleTest() {
-	printf("+---TEST 0---+\nwrite to file and read it back");
-	int fd1 = Open("myfile");
-	Write(fd1, "hi this is my file. it only prints half.\n", 20);
-	Close(fd1);
-	fd1 = Open("myfile");
-	char buffer1[20];
-	Read(fd1, buffer1, 20);
-
-	List();
-
-	Delete("myfile");
-
-	fd1 = Open("myfile");
-
-	Read(fd1, buffer1, 20);
-
-
-	int fd2 = Open("secret");
-
-	char long_str[1000];
-	memset(long_str, 'a', 1000);
-	Write(fd2, long_str, 1000);
-
-	char buffer0[1000];
-	Read(fd2, buffer0, 1000);
-
-	int fd3 = Open("thirdfile");
-	int fd4 = Open("michael");
-
-	List();
-
-	int bytes_to_read = 20;
-	char buffer[bytes_to_read];
-	Read(fd1, buffer, bytes_to_read);
-	printf("Reading fd %d:\n%s", fd1, buffer);
-
-	char buffer2[10];
-	Read(10, buffer2, 10);
-
-	List();
-}
-
 int main (int argc, char *argv[]) {
 	char *host;
 
@@ -465,6 +440,7 @@ int main (int argc, char *argv[]) {
 	ListTest();
 	//CloseTest();
 	//DeleteTest();
+	//SimpleTest();
 
 	exit (0);
 }
