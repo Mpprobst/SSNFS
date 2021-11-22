@@ -106,7 +106,7 @@ void Close(int fd){
 }
 
 void List(){
-	printf("\nIn client: requesting file list.");
+	printf("\nIn client: requesting file list.\n");
 	list_output  *result_4;
 	list_input  list_files_1_arg;
 	strcpy(list_files_1_arg.user_name, getpwuid(getuid())->pw_name);
@@ -114,7 +114,7 @@ void List(){
 	if (result_4 == (list_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
-	printf("files owned by: %s\n%s\n", list_files_1_arg.user_name, result_4->out_msg.out_msg_val);
+	printf("files owned:\n%s\n", result_4->out_msg.out_msg_val);
 }
 
 void Delete(char * filename) {
@@ -385,24 +385,21 @@ void ListTest() {
 	Close(fd1);
 	printf("+-------------+\n\n");
 
-	printf("+---TEST 2---+\nlist when file table is full\n");
-	char fname[6] = "file01";
+	printf("+---TEST 2---+\nlist when user has a lot of files\n");
+	char fname2[6] = "file01";
 	for (int i = 0; i < 20; i++) {
-		sprintf(fname, "file%02d", i);
-		Open(fname);
+		sprintf(fname2, "file%02d", i);
+		Open(fname2);
 	}
 	List();
-	for (int i = 0; i < 20; i++) {
-		Close(i);
-	}
+
 	printf("+-------------+\n\n");
 
-	printf("+---TEST 3---+\ndelete file then list\n");
+	printf("+---TEST 3---+\ndelete files then list\n");
 	for (int i = 0; i < 20; i++) {
-		Open("listtest3");
+		sprintf(fname, "file%02d", i);
+		Delete(fname2);
 	}
-	List();
-	Delete("listtest3");
 	List();
 	printf("+-------------+\n\n");
 
