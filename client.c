@@ -425,17 +425,62 @@ void ListTest() {
 int main (int argc, char *argv[]) {
 	char *host;
 
-	if (argc < 2) {
-		printf ("usage: %s server_host\n", argv[0]);
+	if (argc < 3) {
+		printf ("usage: %s <server_host> <request> \n", argv[0]);
 		exit (1);
 	}
 	host = argv[1];
 	ssnfsprog_1 (host);
 
+	char * request = argv[2];
+	switch (request) {
+		case "open":
+			if (argc < 4) {
+				printf ("usage: %s <server_host> open <filename> \n", argv[0]);
+				exit(1);
+			}
+			int fd = Open(argv[3]);
+			break;
+		case "close":
+			if (argc < 4) {
+				printf ("usage: %s <server_host> close <file descriptor> \n", argv[0]);
+				exit(1);
+			}
+			Close(atoi(argv[3]));
+			break;
+		case "write":
+			if (argc < 6) {
+				printf ("usage: %s <server_host> write <file descriptor> <buffer> <bytes to write> \n", argv[0]);
+				exit(1);
+			}
+			Write(atoi(argv[3]), argv[4], atoi(argv[5]));
+			break;
+		case "read":
+			if (argc < 5) {
+				printf ("usage: %s <server_host> read <file descriptor> <bytes to read> \n", argv[0]);
+				exit(1);
+			}
+			Read(atoi(argv[3]), atoi(argv[4]));
+			break;
+		case "list":
+			List();
+			break;
+		case "delete":
+			if (argc < 4) {
+				printf ("usage: %s <server_host> delete <filename> \n", argv[0]);
+				exit(1);
+			}
+			Delete(argv[3]);
+			break;
+		default:
+			printf("ERROR: Invalid request type\n");
+			break;
+	}
+
 	// Test suites. Recommended to do only one at a time
 	//OpenTest();
 	//WriteTest();
-	ReadTest();
+	//ReadTest();
 	//ListTest();
 	//CloseTest();
 	//DeleteTest();
