@@ -21,12 +21,7 @@ The following requests can be made:
 ### TEST SUITES
 Optionally, you may enter commands that run test suites specific to each command which were used to test this program.
 Do so with the following commands:
-- `./client <hostname> opentest`
-- `./client <hostname> closetest`
-- `./client <hostname> writetest`
-- `./client <hostname> readtest`
-- `./client <hostname> listtest`
-- `./client <hostname> deletetest`
+`opentest`, `closetest`, `writetest`, `readtest`, `listtest`, `deletetest`
 
 ## SPECIFICATIONS
 These are requirements laid out by the assignment:

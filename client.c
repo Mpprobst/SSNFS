@@ -463,7 +463,6 @@ int main (int argc, char *argv[]) {
       	s = realloc(s, (s_len * sizeof(char)) + sizeof(char));
 				s[s_len-1] = ch;
 			}
-			printf("input: %s", s);
 			Write(atoi(fd), s, s_len);
 		}
 		else if (strcmp(request, "read") == 0) {
