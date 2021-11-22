@@ -436,11 +436,10 @@ int main (int argc, char *argv[]) {
 	// Test suites. Recommended to do only one at a time
 	//OpenTest();
 	//WriteTest();
-	//ReadTest();
-	ListTest();
+	ReadTest();
+	//ListTest();
 	//CloseTest();
 	//DeleteTest();
-	//SimpleTest();
 
 	exit (0);
 }
