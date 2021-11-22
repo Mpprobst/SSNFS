@@ -372,36 +372,48 @@ void DeleteTest() {
 	char result2[19];
 	Read(fd2b, result2, 19);	// should give file not exist error
 	printf("+-------------+\n\n");
+}
 
+void ListTest() {
+	printf("+---TEST 0---+\nlist when there are no files open\n");
+	List();
+	printf("+-------------+\n\n");
+
+	printf("+---TEST 1---+\nlist when there is 1 file open\n");
+	int fd1 = Open("listtest1");
+	List();
+	Close(fd1);
+	printf("+-------------+\n\n");
+
+	printf("+---TEST 2---+\nlist when file table is full\n");
+	char fname[6] = "file01";
+	for (int i = 0; i < 20; i++) {
+		sprintf(fname, "file%02d", i);
+		Open(fname);
+	}
+	List();
+	for (int i = 0; i < 20; i++) {
+		Close(i);
+	}
+	printf("+-------------+\n\n");
+
+	printf("+---TEST 3---+\ndelete file then list\n");
+	for (int i = 0; i < 20; i++) {
+		Open("listtest3");
+	}
+	List();
+	Delete("listtest3");
+	List();
+	printf("+-------------+\n\n");
 
 }
 
-int main (int argc, char *argv[])
-{
-	char *host;
-
-	if (argc < 2) {
-		printf ("usage: %s server_host\n", argv[0]);
-		exit (1);
-	}
-	host = argv[1];
-	ssnfsprog_1 (host);
-
-	// Test all cases for open
-	OpenTest();
-	//WriteTest();
-	//ReadTest();
-	//CloseTest();
-	//DeleteTest();
-	/*
+void SimpleTest() {
+	printf("+---TEST 0---+\nwrite to file and read it back");
 	int fd1 = Open("myfile");
-
 	Write(fd1, "hi this is my file. it only prints half.\n", 20);
-
 	Close(fd1);
-
 	fd1 = Open("myfile");
-
 	char buffer1[20];
 	Read(fd1, buffer1, 20);
 
@@ -412,8 +424,8 @@ int main (int argc, char *argv[])
 	fd1 = Open("myfile");
 
 	Read(fd1, buffer1, 20);
-	*/
-	/*
+
+
 	int fd2 = Open("secret");
 
 	char long_str[1000];
@@ -437,6 +449,24 @@ int main (int argc, char *argv[])
 	Read(10, buffer2, 10);
 
 	List();
-*/
-exit (0);
+}
+
+int main (int argc, char *argv[]) {
+	char *host;
+
+	if (argc < 2) {
+		printf ("usage: %s server_host\n", argv[0]);
+		exit (1);
+	}
+	host = argv[1];
+	ssnfsprog_1 (host);
+
+	// Test suites. Recommended to do only one at a time
+	OpenTest();
+	//WriteTest();
+	//ReadTest();
+	//CloseTest();
+	//DeleteTest();
+
+	exit (0);
 }
