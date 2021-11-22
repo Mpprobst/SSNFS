@@ -570,16 +570,17 @@ close_output * close_file_1_svc(close_input *argp, struct svc_req *rqstp)
 		strcpy(message, "ERROR: invalid file descriptor\n");
 		printf("%s", message);
 	}
-	if (table[argp->fd].fp == -1) {
+	else if (table[argp->fd].fp == -1) {
 		strcpy(message, "ERROR: that file is not open\n");
 		printf("%s", message);
 	}
-
-	sprintf(message, "%s closed.\n", table[argp->fd].filename);
-	memset(table[argp->fd].username, ' ', USERNAME_LEN);
-	memset(table[argp->fd].filename, ' ', FILENAME_LEN);
-	table[argp->fd].fp = -1;
-
+	else {
+		sprintf(message, "%s closed.\n", table[argp->fd].filename);
+		memset(table[argp->fd].username, ' ', USERNAME_LEN);
+		memset(table[argp->fd].filename, ' ', FILENAME_LEN);
+		table[argp->fd].fp = -1;
+	}
+	
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = 40;
 	result.out_msg.out_msg_val = malloc(40);
