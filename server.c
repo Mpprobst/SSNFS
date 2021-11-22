@@ -342,6 +342,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			strcpy(message, buffer);
 			close(mem);
 			printf("File read successful\n");
+			result.success = 1;
 		}
 		else {
 			// reading more than exists
@@ -349,6 +350,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 			message = malloc(message_size);
 			strcpy(message, "ERROR: read past end of file\n");
 			printf("ERROR: Read past EOF\n");
+			result.success = -1;
 		}
 	}
 

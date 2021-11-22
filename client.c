@@ -83,8 +83,13 @@ void Read(int fd, char * buffer, int num_bytes_to_read){
 	if (result_2 == (read_output *) NULL) {
 		clnt_perror (clnt, "call failed");
 	}
+	if (result_2.success == 1) {
 	//memcpy(buffer, result_2->out_msg.out_msg_val, result_2->out_msg.out_msg_len);
-	printf("--FILE CONTENTS--\n%s\n--END--\n", result_2->out_msg.out_msg_val);
+		printf("--FILE CONTENTS--\n%s\n--END--\n", result_2->out_msg.out_msg_val);
+	}
+	else {
+		printf("%s\n", result_2->out_msg.out_msg_val);
+	}
 }
 
 void Close(int fd){
@@ -113,7 +118,7 @@ void List(){
 }
 
 void Delete(char * filename) {
-	printf("\nIn client: delete file %s", filename);
+	printf("\nIn client: delete file %s\n", filename);
 	delete_output  *result_5;
 	delete_input  delete_file_1_arg;
 	strcpy(delete_file_1_arg.file_name, filename);
