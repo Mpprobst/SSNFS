@@ -476,6 +476,7 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 	init_disk();
 	printf("\nIn server: gathering list of files owned by %s.\n", argp->user_name);
 	static list_output result;
+	int message_size = 0;
 	// look through meta data and append filenames to an array.
 	int meta = open(metadata_filename, O_RDONLY);
 	lseek(meta, 0, SEEK_SET);
@@ -498,10 +499,19 @@ list_output * list_files_1_svc(list_input *argp, struct svc_req *rqstp)
 			sprintf(files, "%s%02d: %s\n", temp, file_ct, fi.filename);
 		}
 	}
-	printf("%d files beling to %s", file_ct, argp->user_name);
+	printf("%d files belong to %s\n", file_ct, argp->user_name);
+	if (file_ct == 0) {
+		message_size = 18;
+		files = malloc(message_size);
+		strcpy(files, "User owns no files\n");
+	}
+	else {
+		message_size = file_ct*entry_size;
+	}
+
 	close(meta);
 	free(result.out_msg.out_msg_val);
-	result.out_msg.out_msg_len = file_ct*entry_size;
+	result.out_msg.out_msg_len = message_size;
 	result.out_msg.out_msg_val = (char *)malloc(result.out_msg.out_msg_len);
 	strcpy(result.out_msg.out_msg_val, files);
 	return &result;
