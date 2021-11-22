@@ -330,12 +330,11 @@ void ReadTest() {
 	memset(long_str, 'a', 1000);
 	Write(fd6a, long_str, 1000);
 	char buffer6[1000];
-
+	Close(fd6a);
 	int fd6b = Open("dummy1");
 	int fd6c = Open("dummy2");
 	List();
-
-	Close(fd6a);	// get new fd
+	// get new fd
 	fd6a = Open("target");
 	Read(fd6a, buffer6, 1000);
 	printf("+-------------+\n\n");
