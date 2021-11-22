@@ -285,6 +285,7 @@ open_output * open_file_1_svc(open_input *argp, struct svc_req *rqstp) {
 	return &result;
 }
 
+// difficulties reading last byte in file
 read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 	printf("\nIn server: %s attempting to read %dB from file: %d\n", argp->user_name, argp->numbytes, argp->fd);
 	init_disk();
@@ -580,7 +581,7 @@ close_output * close_file_1_svc(close_input *argp, struct svc_req *rqstp)
 		memset(table[argp->fd].filename, ' ', FILENAME_LEN);
 		table[argp->fd].fp = -1;
 	}
-	
+
 	free(result.out_msg.out_msg_val);
 	result.out_msg.out_msg_len = 40;
 	result.out_msg.out_msg_val = malloc(40);
