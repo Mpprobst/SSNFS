@@ -7,14 +7,16 @@ Because the files are saved, between sessions, to clear memory you must delete t
 
 Next, run the server with command `./server`
 
-On another terminal, connect to the server with a client using command `./client <hostname> <request>` where the hostname is the name of the host running the server, and the request is one of the following commands:
+On another terminal, connect to the server with a client using command `./client <hostname>` where the hostname is the name of the host running the server.
+The client will then prompt the user to make a request, some of which will give additional prompts relevant to the request.
 The following requests can be made:
-- `open <filename>`: opens existing file and tracks it in the file table. if the file does not exist, it is created. when a file is opened, its file pointer is set to 0. returns a file descriptor that is used to do further operations to the file.
-- `close <file descriptor>`: closes a file using its given file descriptor, removing it from the file table.
-- `write <file descriptor> <buffer> <bytes to write>`: writes specified number of bytes of given information to a file using its file descriptor. moves file pointer the same number of bytes written.
-- `read <file descriptor> <bytes to read>`: reads a certain number of bytes into a buffer from a designated file. moves file pointer the same number of bytes read.
+- `open`: opens existing file and tracks it in the file table. if the file does not exist, it is created. when a file is opened, its file pointer is set to 0. returns a file descriptor that is used to do further operations to the file.
+- `close`: closes a file using its given file descriptor, removing it from the file table.
+- `write`: writes specified number of bytes of given information to a file using its file descriptor. moves file pointer the same number of bytes written.
+- `read`: reads a certain number of bytes into a buffer from a designated file. moves file pointer the same number of bytes read.
 - `list`: returns a list of all files owned by the user.
-- `delete <filename>`: deletes a file from memory, clearing the blocks of memory it was using and removes it from the metadata file.
+- `delete`: deletes a file from memory, clearing the blocks of memory it was using and removes it from the metadata file.
+- `quit\q\exit`: closes connection to server and terminates program.
 
 ### TEST SUITES
 Optionally, you may enter commands that run test suites specific to each command which were used to test this program.

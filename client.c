@@ -419,7 +419,6 @@ void ListTest() {
 	}
 	List();
 	printf("+-------------+\n\n");
-
 }
 
 int main (int argc, char *argv[]) {
@@ -433,7 +432,7 @@ int main (int argc, char *argv[]) {
 	ssnfsprog_1 (host);
 	int done = -1;
 	while (done == -1) {
-		printf("Please enter request: ");
+		printf("\nPlease enter request (quit to exit): ");
 		char request[10];
 		memset(request, ' ', 10);
 		gets(request);
@@ -462,7 +461,7 @@ int main (int argc, char *argv[]) {
 			while ((ch = getchar()) != '\n') {
 				s_len++;
       	s = realloc(s, (s_len * sizeof(char)) + sizeof(char));
-				s[s_len-1] = ch;	
+				s[s_len-1] = ch;
 			}
 			printf("input: %s", s);
 			Write(atoi(fd), s, s_len);
@@ -506,11 +505,14 @@ int main (int argc, char *argv[]) {
 		else if (strcmp(request, "deletetest") == 0) {
 			DeleteTest();
 		}
+		else if (strcmp(request, "quit") == 0 || strcmp(request, "q") == 0 || strcmp(request, "exit") == 0) {
+			done = 1;
+		}
 		else {
 			printf("ERROR: Invalid request type\n");
 		}
 	}
-
+	printf("Client connection closed...\n");
 	// Test suites. Recommended to do only one at a time
 	//OpenTest();
 	//WriteTest();
