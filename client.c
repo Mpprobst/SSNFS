@@ -447,7 +447,7 @@ int main (int argc, char *argv[]) {
 			printf("Enter file descriptor of file to close: ");
 			char fd[2];
 			gets(fd);
-			Close(atoi(in));
+			Close(atoi(fd));
 		}
 		else if (strcmp(request, "write") == 0) {
 			printf("Enter file descriptor of file to write to: ");
