@@ -462,9 +462,10 @@ int main (int argc, char *argv[]) {
 	ssnfsprog_1 (host);
 
 	// Test suites. Recommended to do only one at a time
-	OpenTest();
+	//OpenTest();
 	//WriteTest();
 	//ReadTest();
+	ListTest();
 	//CloseTest();
 	//DeleteTest();
 
