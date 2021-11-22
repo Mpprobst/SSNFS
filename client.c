@@ -438,24 +438,22 @@ int main (int argc, char *argv[]) {
 		memset(request, ' ', 10);
 		gets(request);
 		if (strcmp(request,"open") == 0) {
-			if (argc < 4) {
-				printf ("usage: %s <server_host> open <filename> \n", argv[0]);
-				exit(1);
-			}
-			int fd = Open(argv[3]);
+			printf("Enter name of file to open: ");
+			char fname[25];
+			gets(fname);
+			int fd = Open(fname);
 		}
 		else if (strcmp(request, "close") == 0) {
-			if (argc < 4) {
-				printf ("usage: %s <server_host> close <file descriptor> \n", argv[0]);
-				exit(1);
-			}
-			Close(atoi(argv[3]));
+			printf("Enter file descriptor of file to close: ");
+			char fd[2];
+			gets(fd);
+			Close(atoi(in));
 		}
 		else if (strcmp(request, "write") == 0) {
-			if (argc < 5) {
-				printf ("usage: %s <server_host> write <file descriptor> \n", argv[0]);
-				exit(1);
-			}
+			printf("Enter file descriptor of file to write to: ");
+			char fd[2];
+			gets(fd);
+
 			char * s;
 			int s_len = 0;
 			int ch;
@@ -469,26 +467,28 @@ int main (int argc, char *argv[]) {
 				}
 			}
 			printf("input: %s", s);
-			Write(atoi(argv[3]), s, s_len);
+			Write(atoi(fd), s, s_len);
 		}
 		else if (strcmp(request, "read") == 0) {
-			if (argc < 5) {
-				printf ("usage: %s <server_host> read <file descriptor> <bytes to read> \n", argv[0]);
-				exit(1);
-			}
-			int nbytes = atoi(argv[5]);
+			printf("Enter file descriptor of file to read: ");
+			char fd[2];
+			gets(fd);
+
+			printf("Enter number of bytes to read: ");
+			char bytes[10];
+			gets(bytes);
+
 			char buffer[atoi(argv[5])];
-			Read(atoi(argv[3]), buffer, atoi(argv[5]));
+			Read(atoi(fd), buffer, atoi(bytes));
 		}
 		else if (strcmp(request, "list") == 0) {
 			List();
 		}
 		else if (strcmp(request, "delete") == 0) {
-			if (argc < 4) {
-				printf ("usage: %s <server_host> delete <filename> \n", argv[0]);
-				exit(1);
-			}
-			Delete(argv[3]);
+			printf("Enter name of file to delete: ");
+			char fname[25];
+			gets(fname);
+			Delete(fname);
 		}
 		else if (strcmp(request, "opentest") == 0) {
 			OpenTest();
