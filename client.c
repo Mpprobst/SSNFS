@@ -433,48 +433,64 @@ int main (int argc, char *argv[]) {
 	ssnfsprog_1 (host);
 
 	char * request = argv[2];
-	switch (request) {
-		case "open":
-			if (argc < 4) {
-				printf ("usage: %s <server_host> open <filename> \n", argv[0]);
-				exit(1);
-			}
-			int fd = Open(argv[3]);
-			break;
-		case "close":
-			if (argc < 4) {
-				printf ("usage: %s <server_host> close <file descriptor> \n", argv[0]);
-				exit(1);
-			}
-			Close(atoi(argv[3]));
-			break;
-		case "write":
-			if (argc < 6) {
-				printf ("usage: %s <server_host> write <file descriptor> <buffer> <bytes to write> \n", argv[0]);
-				exit(1);
-			}
-			Write(atoi(argv[3]), argv[4], atoi(argv[5]));
-			break;
-		case "read":
-			if (argc < 5) {
-				printf ("usage: %s <server_host> read <file descriptor> <bytes to read> \n", argv[0]);
-				exit(1);
-			}
-			Read(atoi(argv[3]), atoi(argv[4]));
-			break;
-		case "list":
-			List();
-			break;
-		case "delete":
-			if (argc < 4) {
-				printf ("usage: %s <server_host> delete <filename> \n", argv[0]);
-				exit(1);
-			}
-			Delete(argv[3]);
-			break;
-		default:
-			printf("ERROR: Invalid request type\n");
-			break;
+	if (strcmp(request,"open") == 0) {
+		if (argc < 4) {
+			printf ("usage: %s <server_host> open <filename> \n", argv[0]);
+			exit(1);
+		}
+		int fd = Open(argv[3]);
+	}
+	else if (strcmp(request, "close") == 0) {
+		if (argc < 4) {
+			printf ("usage: %s <server_host> close <file descriptor> \n", argv[0]);
+			exit(1);
+		}
+		Close(atoi(argv[3]));
+	}
+	else if (strcmp(request, "write") == 0) {
+		if (argc < 6) {
+			printf ("usage: %s <server_host> write <file descriptor> <buffer> <bytes to write> \n", argv[0]);
+			exit(1);
+		}
+		Write(atoi(argv[3]), argv[4], atoi(argv[5]));
+	}
+	else if (strcmp(request, "read") == 0) {
+		if (argc < 5) {
+			printf ("usage: %s <server_host> read <file descriptor> <bytes to read> \n", argv[0]);
+			exit(1);
+		}
+		Read(atoi(argv[3]), atoi(argv[4]));
+	}
+	else if (strcmp(request, "list") == 0) {
+		List();
+	}
+	else if (strcmp(request, "delete") == 0) {
+		if (argc < 4) {
+			printf ("usage: %s <server_host> delete <filename> \n", argv[0]);
+			exit(1);
+		}
+		Delete(argv[3]);
+	}
+	else if (strcmp(request, "opentest") == 0) {
+		OpenTest();
+	}
+	else if (strcmp(request, "closetest") == 0) {
+		CloseTest();
+	}
+	else if (strcmp(request, "writetest") == 0) {
+		WriteTest();
+	}
+	else if (strcmp(request, "readtest") == 0) {
+		ReadTest();
+	}
+	else if (strcmp(request, "listtest") == 0) {
+		ListTest();
+	}
+	else if (strcmp(request, "deletetest") == 0) {
+		DeleteTest();
+	}
+	else {
+		printf("ERROR: Invalid request type\n");
 	}
 
 	// Test suites. Recommended to do only one at a time
