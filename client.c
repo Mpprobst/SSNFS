@@ -459,12 +459,10 @@ int main (int argc, char *argv[]) {
 			int ch;
 			printf("Enter string, press return to submit: ");
 			// read input
-			while ((ch = getchar()) != EOF || s_len >= argv[4]) {
-    		if (ch == '\n') {
-					s_len++;
-        	s = realloc(s, (s_len * sizeof(char)) + sizeof(char));
-					s[s_len-1] = ch;
-				}
+			while ((ch = getchar()) != '\n') {
+				s_len++;
+      	s = realloc(s, (s_len * sizeof(char)) + sizeof(char));
+				s[s_len-1] = ch;	
 			}
 			printf("input: %s", s);
 			Write(atoi(fd), s, s_len);
