@@ -1,6 +1,7 @@
 # SIMPLE STATEFUL NETWORK FILE SERVER
 This is a solution to HW4 for CS570 instructed by Dr. Manivannan at the University of Kentucky.
 The goal of this project is to implement a simple stateful network file server - that is the server will host files created by clients.
+
 ## USAGE
 Compiling the server and client can be done using the makefile. Simply enter the command `make`.
 Because the files are saved, between sessions, to clear memory you must delete the memory and metadata file. Do so with the `make clean` command.
@@ -30,6 +31,7 @@ These are requirements laid out by the assignment:
 - files may allocate a maximum of 64 blocks
 - the maximum size of memory is 16MB
 - server must be stateful containing file table tracking which files are open and the value of the file pointers of the open files.
+
 ## IMPLEMENTATION DETAILS
 These are some decisions I made that were not specified by the assignment handout:
 - users may create any number of files they want.
@@ -41,3 +43,4 @@ These are some decisions I made that were not specified by the assignment handou
 
 ## LIMITATIONS
 - the client assumes input will always be correct. it assumes that when an operation requires a file descriptor, that an integer will be entered and not some character or other variable type. if incorrect variable types are given, the request will likely not work as intended, but undesirable side effects may occur as these cases are not handled.
+- there is an issue where the last byte of a file cannot be read.
