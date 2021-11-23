@@ -335,6 +335,7 @@ read_output * read_file_1_svc(read_input *argp, struct svc_req *rqstp) {
 				//printf("read from fi.blocks[%d] = %d into message[%d]=%s\n", i, fi.blocks[i], bytes_read, buffer);
 				//printf("read mem loc %d. %d/%d bytes\n", read_loc, bytes_read, nbytes);
 			}
+			printf("read: %s\n", buffer);
 			if (bytes_read > 0) {
 				buffer[nbytes] = '\0';
 			}
