@@ -1,3 +1,8 @@
+### SSNFS
+
+This project implements a simple stateful network file server (SSNFS) that supports remote file service model.
+Server and client are implemented as Sun RPC.
+
 ### Build Instructions
 
 Note: The GNU readline library is required for this project to build.
